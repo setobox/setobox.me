@@ -4,6 +4,11 @@ description: '本文将介绍如何使用 Milanote API。'
 date: 2026-07-22
 update: 2026-07-23
 cover: ''
+tags: 
+ - 'Milanote'
+ - 'API'
+categories: 
+ - '工具'
 ---
 ## 引言
 
