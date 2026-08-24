@@ -1,0 +1,38 @@
+{
+  "name": "setobox-home",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vue-tsc --build && vp build",
+    "preview": "vp preview",
+    "typecheck": "vue-tsc --build",
+    "prepare": "vp config"
+  },
+  "dependencies": {
+    "gsap": "catalog:frontend",
+    "lenis": "catalog:frontend",
+    "vue": "catalog:frontend",
+    "vue-router": "catalog:frontend"
+  },
+  "devDependencies": {
+    "@antfu/ni": "^30.5.0",
+    "@iconify-json/lucide": "catalog:dev",
+    "@iconify-json/simple-icons": "catalog:dev",
+    "@types/node": "catalog:dev",
+    "@vitejs/plugin-vue": "catalog:dev",
+    "typescript": "~6.0.2",
+    "unocss": "catalog:dev",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vue-tsc": "catalog:dev"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.23.0",
+      "onFail": "download"
+    }
+  }
+}
