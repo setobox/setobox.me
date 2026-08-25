@@ -1,78 +1,74 @@
 <script setup lang="ts">
-/**
- * SpotlightCard - a panel with a radial highlight that tracks the cursor.
- *
- * Position is handed to CSS as custom properties and the gradient lives in a
- * pseudo-element, so pointer moves never touch Vue's reactivity or trigger a
- * re-render - only a compositor repaint.
- */
-import { useTemplateRef } from "vue";
+import { ref, useTemplateRef } from "vue";
 
-interface Props {
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface SpotlightCardProps {
+  className?: string;
   spotlightColor?: string;
-  /** Diameter of the highlight, px. */
+  /** Radius of the highlight, in pixels. */
   size?: number;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  spotlightColor: "rgba(139, 92, 246, 0.22)",
-  size: 460,
-});
+const {
+  className = "",
+  spotlightColor = "rgba(255, 255, 255, 0.25)",
+  size = 460,
+} = defineProps<SpotlightCardProps>();
 
-const root = useTemplateRef<HTMLDivElement>("root");
+const divRef = useTemplateRef<HTMLDivElement>("divRef");
+const isFocused = ref<boolean>(false);
+const position = ref<Position>({ x: 0, y: 0 });
+const opacity = ref<number>(0);
 
-function onMove(event: PointerEvent) {
-  const el = root.value;
-  if (!el) return;
-  const rect = el.getBoundingClientRect();
-  el.style.setProperty("--mx", `${event.clientX - rect.left}px`);
-  el.style.setProperty("--my", `${event.clientY - rect.top}px`);
-}
+const handleMouseMove = (e: MouseEvent) => {
+  if (!divRef.value || isFocused.value) return;
 
-function onEnter() {
-  root.value?.style.setProperty("--spot-opacity", "1");
-}
+  const rect = divRef.value.getBoundingClientRect();
+  position.value = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+};
 
-function onLeave() {
-  root.value?.style.setProperty("--spot-opacity", "0");
-}
+const handleFocus = () => {
+  isFocused.value = true;
+  opacity.value = 0.6;
+};
+
+const handleBlur = () => {
+  isFocused.value = false;
+  opacity.value = 0;
+};
+
+const handleMouseEnter = () => {
+  opacity.value = 0.6;
+};
+
+const handleMouseLeave = () => {
+  opacity.value = 0;
+};
 </script>
 
 <template>
   <div
-    ref="root"
-    class="spotlight relative overflow-hidden"
-    :style="{
-      '--spot-color': props.spotlightColor,
-      '--spot-size': `${props.size}px`,
-    }"
-    @pointermove="onMove"
-    @pointerenter="onEnter"
-    @pointerleave="onLeave"
+    ref="divRef"
+    @mousemove="handleMouseMove"
+    @focus="handleFocus"
+    @blur="handleBlur"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+    :class="['relative rounded-3xl border overflow-hidden p-8', className]"
   >
+    <div
+      class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 ease-in-out"
+      :style="{
+        opacity,
+        // Keep the original radial gradient while exposing the size option.
+        background: `radial-gradient(circle ${size}px at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 80%)`,
+      }"
+    />
+
     <slot />
   </div>
 </template>
-
-<style scoped>
-.spotlight {
-  --mx: 50%;
-  --my: 50%;
-  --spot-opacity: 0;
-}
-
-.spotlight::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: var(--spot-opacity);
-  transition: opacity 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
-  background: radial-gradient(
-    var(--spot-size) circle at var(--mx) var(--my),
-    var(--spot-color),
-    transparent 65%
-  );
-}
-</style>

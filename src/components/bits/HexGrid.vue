@@ -1,291 +1,353 @@
 <script setup lang="ts">
-/**
- * HexGrid - the site's backdrop.
- *
- * A honeycomb of hexagons on a single canvas. The cursor lights nearby cells
- * and, when moved fast enough, fires a shockwave that shoves them outward
- * before GSAP eases each one home. Hexagon = box = the Setobox mark, so the
- * background carries the same motif as the logo.
- *
- * One canvas, no DOM node per cell - a 1920x1080 viewport is ~1.2k cells,
- * well past the point where individual elements stop being viable.
- */
-import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
-import { gsap, prefersReducedMotion } from "@/composables/useGSAP";
+import { gsap } from "gsap";
+import { InertiaPlugin } from "gsap/InertiaPlugin";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  useTemplateRef,
+  watch,
+  type CSSProperties,
+} from "vue";
 
-interface Props {
-  /** Circumradius of each hexagon, px. */
-  radius?: number;
-  /** Extra gap between hexagons on top of tight honeycomb packing, px. */
+gsap.registerPlugin(InertiaPlugin);
+
+const throttle = <T extends unknown[]>(func: (...args: T) => void, limit: number) => {
+  let lastCall = 0;
+  return function (this: unknown, ...args: T) {
+    const now = performance.now();
+    if (now - lastCall >= limit) {
+      lastCall = now;
+      func.apply(this, args);
+    }
+  };
+};
+
+interface Hex {
+  cx: number;
+  cy: number;
+  xOffset: number;
+  yOffset: number;
+  _inertiaApplied: boolean;
+}
+
+export interface HexGridProps {
+  hexSize?: number;
   gap?: number;
   baseColor?: string;
   activeColor?: string;
-  /** Cursor distance, px, at which a cell reaches full activation. */
   proximity?: number;
-  /** Pointer speed, px/s, that triggers a shockwave. */
   speedTrigger?: number;
-  /** Radius of the shockwave, px. */
   shockRadius?: number;
-  /** Push distance at the shockwave epicentre, px. */
   shockStrength?: number;
-  /** Seconds for a displaced cell to return. */
+  maxSpeed?: number;
+  resistance?: number;
   returnDuration?: number;
-  /** Draw filled hexagons instead of outlines. */
-  filled?: boolean;
-  lineWidth?: number;
+  /** Draw only the hexagon outline instead of only its fill. */
+  stroke?: boolean;
+  className?: string;
+  style?: CSSProperties;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  radius: 9,
-  gap: 22,
-  baseColor: "#151032",
-  activeColor: "#8B5CF6",
-  proximity: 170,
-  speedTrigger: 1000,
-  shockRadius: 220,
-  shockStrength: 14,
-  returnDuration: 1.4,
-  filled: false,
-  lineWidth: 1.2,
+const props = withDefaults(defineProps<HexGridProps>(), {
+  hexSize: 16,
+  gap: 32,
+  baseColor: "#27FF64",
+  activeColor: "#27FF64",
+  proximity: 150,
+  speedTrigger: 100,
+  shockRadius: 250,
+  shockStrength: 5,
+  maxSpeed: 5000,
+  resistance: 750,
+  returnDuration: 1.5,
+  stroke: false,
+  className: "",
+  style: () => ({}),
 });
 
-interface Cell {
-  cx: number;
-  cy: number;
-  ox: number; // offset from home, animated by GSAP
-  oy: number;
-}
-
+const wrapperRef = useTemplateRef<HTMLDivElement>("wrapperRef");
 const canvasRef = useTemplateRef<HTMLCanvasElement>("canvasRef");
-const wrapRef = useTemplateRef<HTMLDivElement>("wrapRef");
-const reduced = ref(false);
-
-let cells: Cell[] = [];
-let ctx: CanvasRenderingContext2D | null = null;
-let rafId = 0;
-let resizeObserver: ResizeObserver | null = null;
-let dpr = 1;
-
-const pointer = { x: -9999, y: -9999, lastX: 0, lastY: 0, lastT: 0, speed: 0 };
-let lastShockT = 0;
-
-/** Pre-computed unit hexagon vertices (pointy-top), reused every frame. */
-const unitHex = Array.from({ length: 6 }, (_, i) => {
-  const a = (Math.PI / 3) * i - Math.PI / 2;
-  return [Math.cos(a), Math.sin(a)] as const;
+const hexes = ref<Hex[]>([]);
+const pointer = ref({
+  x: 0,
+  y: 0,
+  vx: 0,
+  vy: 0,
+  speed: 0,
+  lastTime: 0,
+  lastX: 0,
+  lastY: 0,
 });
 
-const baseRGB = computed(() => hexToRgb(props.baseColor));
-const activeRGB = computed(() => hexToRgb(props.activeColor));
-
-function hexToRgb(hex: string): [number, number, number] {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
-  if (!m) return [255, 255, 255];
-  return [Number.parseInt(m[1]!, 16), Number.parseInt(m[2]!, 16), Number.parseInt(m[3]!, 16)];
+function hexToRgb(hex: string) {
+  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+  if (!m) return { r: 0, g: 0, b: 0 };
+  return {
+    r: parseInt(m[1]!, 16),
+    g: parseInt(m[2]!, 16),
+    b: parseInt(m[3]!, 16),
+  };
 }
 
-function buildGrid() {
+const baseRgb = computed(() => hexToRgb(props.baseColor));
+const activeRgb = computed(() => hexToRgb(props.activeColor));
+
+// Only change vs DotGrid: a pointy-top hexagon path replaces the circle path.
+const hexagonPath = computed(() => {
+  if (typeof window === "undefined" || !window.Path2D) return null;
+
+  const p = new Path2D();
+  const r = props.hexSize / 2;
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i - Math.PI / 2;
+    const x = Math.cos(a) * r;
+    const y = Math.sin(a) * r;
+    if (i === 0) p.moveTo(x, y);
+    else p.lineTo(x, y);
+  }
+  p.closePath();
+  return p;
+});
+
+const buildGrid = () => {
+  const wrap = wrapperRef.value;
   const canvas = canvasRef.value;
-  const wrap = wrapRef.value;
-  if (!canvas || !wrap) return;
+  if (!wrap || !canvas) return;
 
   const { width, height } = wrap.getBoundingClientRect();
-  if (width === 0 || height === 0) return;
+  const dpr = window.devicePixelRatio || 1;
 
-  dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = Math.floor(width * dpr);
-  canvas.height = Math.floor(height * dpr);
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
+  const ctx = canvas.getContext("2d");
+  if (ctx) ctx.scale(dpr, dpr);
 
-  ctx = canvas.getContext("2d");
-  ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const cell = props.hexSize + props.gap;
+  // Hexagonal packing: rows sit sqrt(3)/2 of a cell apart so every neighbour
+  // (side and diagonal) stays exactly one cell away.
+  const rowStep = cell * (Math.sqrt(3) / 2);
 
-  // Pointy-top honeycomb: columns sit sqrt(3)*r apart, rows 1.5*r, and odd
-  // rows shift half a column so the cells interlock.
-  const r = props.radius;
-  const stepX = Math.sqrt(3) * r + props.gap;
-  const stepY = 1.5 * r + props.gap * 0.86;
+  const cols = Math.floor((width + props.gap) / (props.hexSize + props.gap));
+  // Rows advance by rowStep instead of the square cell.
+  const rows = Math.floor((height - props.hexSize) / rowStep) + 1;
 
-  const cols = Math.ceil(width / stepX) + 2;
-  const rows = Math.ceil(height / stepY) + 2;
+  // Odd rows overhang half a cell to the right, so the row band is that wider.
+  const gridW = cell * cols - props.gap + (rows > 1 ? cell / 2 : 0);
+  const gridH = rowStep * (rows - 1) + props.hexSize;
 
-  const startX = (width - (cols - 1) * stepX) / 2;
-  const startY = (height - (rows - 1) * stepY) / 2;
+  const extraX = width - gridW;
+  const extraY = height - gridH;
 
-  const next: Cell[] = [];
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      next.push({
-        cx: startX + col * stepX + (row % 2 ? stepX / 2 : 0),
-        cy: startY + row * stepY,
-        ox: 0,
-        oy: 0,
+  const startX = extraX / 2 + props.hexSize / 2;
+  const startY = extraY / 2 + props.hexSize / 2;
+
+  const newHexes: Hex[] = [];
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      // Stagger odd rows by half a cell to interlock the hexagons.
+      const cx = startX + x * cell + (y % 2 ? cell / 2 : 0);
+      const cy = startY + y * rowStep;
+      newHexes.push({ cx, cy, xOffset: 0, yOffset: 0, _inertiaApplied: false });
+    }
+  }
+  hexes.value = newHexes;
+};
+
+let rafId: number;
+let resizeObserver: ResizeObserver | null = null;
+
+const draw = () => {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const { x: px, y: py } = pointer.value;
+  const proxSq = props.proximity * props.proximity;
+
+  for (const hex of hexes.value) {
+    const ox = hex.cx + hex.xOffset;
+    const oy = hex.cy + hex.yOffset;
+    const dx = hex.cx - px;
+    const dy = hex.cy - py;
+    const dsq = dx * dx + dy * dy;
+
+    let style = props.baseColor;
+    if (dsq <= proxSq) {
+      const dist = Math.sqrt(dsq);
+      const t = 1 - dist / props.proximity;
+      const r = Math.round(baseRgb.value.r + (activeRgb.value.r - baseRgb.value.r) * t);
+      const g = Math.round(baseRgb.value.g + (activeRgb.value.g - baseRgb.value.g) * t);
+      const b = Math.round(baseRgb.value.b + (activeRgb.value.b - baseRgb.value.b) * t);
+      style = `rgb(${r},${g},${b})`;
+    }
+
+    if (hexagonPath.value) {
+      ctx.save();
+      ctx.translate(ox, oy);
+      // Outline-only when stroke is on, otherwise fill-only.
+      if (props.stroke) {
+        ctx.strokeStyle = style;
+        ctx.stroke(hexagonPath.value);
+      } else {
+        ctx.fillStyle = style;
+        ctx.fill(hexagonPath.value);
+      }
+      ctx.restore();
+    }
+  }
+
+  rafId = requestAnimationFrame(draw);
+};
+
+const onMove = (e: MouseEvent) => {
+  const now = performance.now();
+  const pr = pointer.value;
+  const dt = pr.lastTime ? now - pr.lastTime : 16;
+  const dx = e.clientX - pr.lastX;
+  const dy = e.clientY - pr.lastY;
+  let vx = (dx / dt) * 1000;
+  let vy = (dy / dt) * 1000;
+  let speed = Math.hypot(vx, vy);
+  if (speed > props.maxSpeed) {
+    const scale = props.maxSpeed / speed;
+    vx *= scale;
+    vy *= scale;
+    speed = props.maxSpeed;
+  }
+  pr.lastTime = now;
+  pr.lastX = e.clientX;
+  pr.lastY = e.clientY;
+  pr.vx = vx;
+  pr.vy = vy;
+  pr.speed = speed;
+
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  pr.x = e.clientX - rect.left;
+  pr.y = e.clientY - rect.top;
+
+  // speed check wave
+  for (const hex of hexes.value) {
+    const dist = Math.hypot(hex.cx - pr.x, hex.cy - pr.y);
+    if (speed > props.speedTrigger && dist < props.proximity && !hex._inertiaApplied) {
+      hex._inertiaApplied = true;
+      gsap.killTweensOf(hex);
+      const pushX = hex.cx - pr.x + vx * 0.005;
+      const pushY = hex.cy - pr.y + vy * 0.005;
+      gsap.to(hex, {
+        inertia: { xOffset: pushX, yOffset: pushY, resistance: props.resistance },
+        onComplete: () => {
+          gsap.to(hex, {
+            xOffset: 0,
+            yOffset: 0,
+            duration: props.returnDuration,
+            // ease: "elastic.out(1,0.75)",
+          });
+          hex._inertiaApplied = false;
+        },
       });
     }
   }
-  cells = next;
-}
+};
 
-function tracePath(c: CanvasRenderingContext2D, x: number, y: number, r: number) {
-  c.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const v = unitHex[i]!;
-    const px = x + v[0] * r;
-    const py = y + v[1] * r;
-    if (i === 0) c.moveTo(px, py);
-    else c.lineTo(px, py);
-  }
-  c.closePath();
-}
-
-function draw() {
-  rafId = requestAnimationFrame(draw);
-  const c = ctx;
-  if (!c) return;
-
-  c.clearRect(0, 0, c.canvas.width / dpr, c.canvas.height / dpr);
-
-  const prox = props.proximity;
-  const proxSq = prox * prox;
-  const base = baseRGB.value;
-  const active = activeRGB.value;
-  c.lineWidth = props.lineWidth;
-
-  for (const cell of cells) {
-    const x = cell.cx + cell.ox;
-    const y = cell.cy + cell.oy;
-
-    const dx = x - pointer.x;
-    const dy = y - pointer.y;
-    const dSq = dx * dx + dy * dy;
-
-    // Squared falloff so the lit pool has a soft edge, not a hard disc.
-    let t = 0;
-    if (dSq < proxSq) {
-      t = 1 - Math.sqrt(dSq) / prox;
-      t *= t;
-    }
-
-    const style =
-      t > 0.002
-        ? `rgb(${Math.round(base[0] + (active[0] - base[0]) * t)} ${Math.round(
-            base[1] + (active[1] - base[1]) * t,
-          )} ${Math.round(base[2] + (active[2] - base[2]) * t)})`
-        : `rgb(${base[0]} ${base[1]} ${base[2]})`;
-
-    tracePath(c, x, y, props.radius * (1 + t * 0.5));
-
-    if (props.filled || t > 0.55) {
-      c.fillStyle = style;
-      c.fill();
-    } else {
-      c.strokeStyle = style;
-      c.stroke();
+const onClick = (e: MouseEvent) => {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const cx = e.clientX - rect.left;
+  const cy = e.clientY - rect.top;
+  for (const hex of hexes.value) {
+    const dist = Math.hypot(hex.cx - cx, hex.cy - cy);
+    if (dist < props.shockRadius && !hex._inertiaApplied) {
+      hex._inertiaApplied = true;
+      gsap.killTweensOf(hex);
+      const falloff = Math.max(0, 1 - dist / props.shockRadius);
+      const pushX = (hex.cx - cx) * props.shockStrength * falloff;
+      const pushY = (hex.cy - cy) * props.shockStrength * falloff;
+      gsap.to(hex, {
+        inertia: { xOffset: pushX, yOffset: pushY, resistance: props.resistance },
+        onComplete: () => {
+          gsap.to(hex, {
+            xOffset: 0,
+            yOffset: 0,
+            duration: props.returnDuration,
+            ease: "elastic.out(1,0.75)",
+          });
+          hex._inertiaApplied = false;
+        },
+      });
     }
   }
-}
+};
 
-function onPointerMove(event: PointerEvent) {
-  const wrap = wrapRef.value;
-  if (!wrap) return;
+const throttledMove = throttle(onMove, 50);
 
-  const rect = wrap.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  const now = performance.now();
-
-  const dt = Math.max(now - pointer.lastT, 1);
-  pointer.speed = (Math.hypot(x - pointer.lastX, y - pointer.lastY) / dt) * 1000;
-
-  pointer.x = x;
-  pointer.y = y;
-  pointer.lastX = x;
-  pointer.lastY = y;
-  pointer.lastT = now;
-
-  // Rate-limit shockwaves. A fast drag would otherwise fire one per frame and
-  // leave every cell permanently mid-tween.
-  if (pointer.speed > props.speedTrigger && now - lastShockT > 400) {
-    lastShockT = now;
-    shock(x, y);
-  }
-}
-
-function shock(x: number, y: number) {
-  const rad = props.shockRadius;
-  for (const cell of cells) {
-    const dx = cell.cx - x;
-    const dy = cell.cy - y;
-    const d = Math.hypot(dx, dy);
-    if (d >= rad || d === 0) continue;
-
-    const falloff = 1 - d / rad;
-    const push = props.shockStrength * falloff * falloff * 4;
-
-    gsap.killTweensOf(cell);
-    gsap.to(cell, {
-      ox: (dx / d) * push,
-      oy: (dy / d) * push,
-      duration: 0.22,
-      ease: "power2.out",
-      onComplete: () => {
-        gsap.to(cell, {
-          ox: 0,
-          oy: 0,
-          duration: props.returnDuration,
-          ease: "elastic.out(1, 0.55)",
-        });
-      },
-    });
-  }
-}
-
-function onPointerLeave() {
-  pointer.x = -9999;
-  pointer.y = -9999;
-}
-
-/** Ripple outward from a point. Used as a page-load flourish. */
-function pulse(x?: number, y?: number) {
-  const wrap = wrapRef.value;
-  if (!wrap) return;
-  const rect = wrap.getBoundingClientRect();
-  shock(x ?? rect.width / 2, y ?? rect.height / 2);
-}
-
-defineExpose({ pulse });
-
-onMounted(() => {
-  reduced.value = prefersReducedMotion();
+onMounted(async () => {
+  await nextTick();
 
   buildGrid();
-  draw();
 
-  const wrap = wrapRef.value;
-  if (wrap) {
-    resizeObserver = new ResizeObserver(() => buildGrid());
-    resizeObserver.observe(wrap);
+  if (hexagonPath.value) {
+    draw();
   }
 
-  if (!reduced.value) {
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("pointerleave", onPointerLeave, { passive: true });
+  if ("ResizeObserver" in window) {
+    resizeObserver = new ResizeObserver(buildGrid);
+    if (wrapperRef.value) {
+      resizeObserver.observe(wrapperRef.value);
+    }
+  } else {
+    (window as Window).addEventListener("resize", buildGrid);
   }
+
+  window.addEventListener("mousemove", throttledMove, { passive: true });
+  window.addEventListener("click", onClick);
 });
 
 onUnmounted(() => {
-  cancelAnimationFrame(rafId);
-  resizeObserver?.disconnect();
-  window.removeEventListener("pointermove", onPointerMove);
-  window.removeEventListener("pointerleave", onPointerLeave);
-  for (const cell of cells) gsap.killTweensOf(cell);
-  cells = [];
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+  }
+
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  } else {
+    window.removeEventListener("resize", buildGrid);
+  }
+
+  window.removeEventListener("mousemove", throttledMove);
+  window.removeEventListener("click", onClick);
+});
+
+watch([() => props.hexSize, () => props.gap], () => {
+  buildGrid();
+});
+
+watch([() => props.proximity, () => props.baseColor, activeRgb, baseRgb, hexagonPath], () => {
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+  }
+  if (hexagonPath.value) {
+    draw();
+  }
 });
 </script>
 
 <template>
-  <div ref="wrapRef" class="absolute inset-0 overflow-hidden">
-    <canvas ref="canvasRef" class="block h-full w-full" aria-hidden="true" />
-  </div>
+  <section
+    :class="`flex items-center justify-center h-full w-full relative ${className}`"
+    :style="style"
+  >
+    <div ref="wrapperRef" class="relative w-full h-full">
+      <canvas ref="canvasRef" class="absolute inset-0 w-full h-full pointer-events-none" />
+    </div>
+  </section>
 </template>

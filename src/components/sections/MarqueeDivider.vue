@@ -16,12 +16,13 @@ defineProps<Props>();
   <div class="relative overflow-hidden py-6" aria-hidden="true">
     <ScrollVelocity
       :texts="texts"
-      :velocity="70"
+      :velocity="60"
       :damping="50"
       :stiffness="400"
-      class-name="font-display font-light uppercase text-[clamp(2.6rem,9vw,7rem)] leading-[1.15] tracking-[0.02em] text-stroke text-silver-700"
+      :velocity-mapping="{ input: [0, 1000], output: [0, 5] }"
+      class-name="font-display font-light uppercase text-[clamp(2.6rem,9vw,7rem)] leading-[1.15] tracking-[0.02em] text-stroke-silver-200"
     />
-    <!-- Fade the bands into the page edges so they read as a texture rather
+    <!-- Fade the bands into the page edges so they read as a texture rather 
          than a hard-cropped element. -->
     <div
       class="pointer-events-none absolute inset-y-0 left-0 w-[14vw] bg-gradient-to-r from-void-900 to-transparent"

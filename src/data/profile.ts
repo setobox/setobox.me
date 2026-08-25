@@ -50,8 +50,8 @@ export const infoRows: InfoRow[] = [
   { label: "NAME", value: "Setobox", icon: "i-lucide-user" },
   { label: "BIRTH", value: "2000-06-12", icon: "i-lucide-cake" },
   { label: "LOCATION", value: "Shanghai, CN", icon: "i-lucide-map-pin" },
-  { label: "FIELD", value: "Program", icon: "i-lucide-terminal" },
-  { label: "INTEREST", value: "Creation", icon: "i-lucide-sparkles" },
+  { label: "FIELD", value: "Frontend / Yak Shaver", icon: "i-lucide-terminal" },
+  { label: "INTEREST", value: "Tech / Art", icon: "i-lucide-sparkles" },
 ];
 
 /** The honeycomb of roles. Order drives the staggered reveal. */
@@ -78,12 +78,11 @@ export const stack: Tech[] = [
   { name: "CSS", key: true },
   { name: "React" },
   { name: "Vite", key: true },
-  { name: "TailwindCSS", key: true },
+  { name: "Tailwind", key: true },
   { name: "UnoCSS", key: true },
   { name: "GSAP" },
   { name: "Node" },
   { name: "Git" },
-  { name: "Photoshop" },
 ];
 
 export const socials: Social[] = [
@@ -116,6 +115,6 @@ export const socials: Social[] = [
 export const navItems = [
   { text: "Home", href: "/" },
   { text: "About", href: "/about" },
-  { text: "Uses", href: "https://blog.setobox.me/uses" },
+  { text: "Use", href: "https://blog.setobox.me/use" },
   { text: "Posts", href: "https://blog.setobox.me" },
 ] as const;

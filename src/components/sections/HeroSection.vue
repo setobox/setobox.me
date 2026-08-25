@@ -2,11 +2,12 @@
 /**
  * HeroSection - full-viewport headline with a hexagon ring behind it.
  *
- * The two headline lines are split into words and revealed on a stagger, then
- * the ring, typewriter and scroll cue land in sequence. One timeline drives all
- * of it so the rhythm stays fixed regardless of how long the fonts took.
+ * The headline lines use AnimatedContent so their entrance behavior stays
+ * consistent with the rest of the site. The ring and scroll parallax remain
+ * local GSAP effects because they are continuous scene motion.
  */
 import { computed, useTemplateRef } from "vue";
+import AnimatedContent from "@/components/bits/AnimatedContent.vue";
 import TextType from "@/components/bits/TextType.vue";
 import { useSmoothScroll } from "@/composables/useSmoothScroll";
 import { gsap, useGSAP } from "@/composables/useGSAP";
@@ -14,52 +15,51 @@ import { profile, site } from "@/data/profile";
 
 const root = useTemplateRef<HTMLElement>("root");
 const { scrollTo } = useSmoothScroll();
+const props = defineProps<{ ready: boolean }>();
 
 /** Words carry their own spans so GSAP can stagger them individually. */
 const lines = computed(() => profile.headline.map((line) => line.split(" ")));
+const firstLine = computed(() => lines.value[0] ?? []);
+const secondLine = computed(() => lines.value[1] ?? []);
 
 useGSAP(
   ({ reduced }) => {
     if (reduced) return;
 
-    const tl = gsap.timeline({ delay: 0.35 });
-
-    tl.from(".hero-word", {
-      yPercent: 118,
-      opacity: 0,
-      duration: 1.05,
-      ease: "expo.out",
-      stagger: 0.085,
-    })
-      .from(
-        ".hero-ring",
-        { scale: 0.55, opacity: 0, rotate: -75, duration: 1.6, ease: "expo.out" },
-        0.15,
-      )
-      .from(".hero-meta", { y: 24, opacity: 0, duration: 0.8, ease: "power3.out" }, "-=0.7")
-      .from(".hero-cue", { y: -14, opacity: 0, duration: 0.7, ease: "power2.out" }, "-=0.4");
-
-    // Slow drift on the ring once it has settled, so the hero is never static.
-    gsap.to(".hero-ring", {
-      rotate: 360,
-      duration: 90,
-      ease: "none",
-      repeat: -1,
-      delay: 2,
-    });
-
-    // Parallax the headline out as the next section arrives.
-    gsap.to(".hero-inner", {
-      yPercent: -14,
-      opacity: 0.25,
-      ease: "none",
-      scrollTrigger: {
-        trigger: root.value,
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
+    // .hero-cue bounces in after the headline has settled, then fades out as the user scrolls down.
+    gsap.fromTo(
+      ".hero-cue",
+      { opacity: 0, y: -20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power3.out",
+        delay: 2.5,
       },
-    });
+    );
+
+    // // Slow drift on the ring once it has settled, so the hero is never static.
+    // gsap.to(".hero-ring", {
+    //   rotate: 360,
+    //   duration: 90,
+    //   ease: "none",
+    //   repeat: -1,
+    //   delay: 2,
+    // });
+
+    // // Parallax the headline out as the next section arrives.
+    // gsap.to(".hero-inner", {
+    //   yPercent: -14,
+    //   opacity: 0.25,
+    //   ease: "none",
+    //   scrollTrigger: {
+    //     trigger: root.value,
+    //     start: "top top",
+    //     end: "bottom top",
+    //     scrub: true,
+    //   },
+    // });
   },
   { scope: root },
 );
@@ -75,7 +75,7 @@ function next() {
     class="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-5"
   >
     <!-- Concentric hexagon rings behind the type. -->
-    <div
+    <!-- <div
       class="hero-ring pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[min(86vw,min(74vh,660px))] -translate-x-1/2 -translate-y-1/2"
       aria-hidden="true"
     >
@@ -102,40 +102,73 @@ function next() {
           />
         </g>
       </svg>
-    </div>
+    </div> -->
 
     <div class="hero-inner relative z-2 flex w-full max-w-6xl flex-col items-center">
       <h1
         class="text-center font-display font-light uppercase leading-[1.04] tracking-[0.01em] text-silver-50 text-[clamp(1.85rem,7.8vw,5.4rem)]"
         translate="no"
       >
-        <span v-for="(line, li) in lines" :key="li" class="block overflow-hidden py-[0.06em]">
-          <span
-            v-for="(word, wi) in line"
-            :key="wi"
-            class="hero-word inline-block will-change-transform"
-            :class="{ 'text-violet-300': li === 1 && wi === line.length - 1 }"
-          >
-            {{ word }}<span v-if="wi < line.length - 1">&nbsp;</span>
-          </span>
-        </span>
+        <AnimatedContent
+          v-if="props.ready"
+          :distance="100"
+          direction="vertical"
+          :reverse="false"
+          :duration="1.1"
+          ease="power3.out"
+          :initial-opacity="0"
+          :animate-opacity="true"
+          :scale="1.1"
+          :threshold="0.1"
+          :delay="0.5"
+        >
+          <p class="overflow-hidden py-[0.06em]">
+            <span v-for="(word, wi) in firstLine" :key="wi" class="text-glow">
+              {{ word }}<span v-if="wi < firstLine.length - 1">&nbsp;</span>
+            </span>
+          </p>
+        </AnimatedContent>
+        <AnimatedContent
+          v-if="props.ready"
+          :distance="100"
+          direction="vertical"
+          :reverse="false"
+          :duration="1.5"
+          ease="power3.out"
+          :initial-opacity="0"
+          :animate-opacity="true"
+          :scale="1.2"
+          :threshold="0.1"
+          :delay="0.9"
+        >
+          <p class="overflow-hidden py-[0.06em]">
+            <span
+              v-for="(word, wi) in secondLine"
+              :key="wi"
+              :class="{ 'text-violet-300': wi === secondLine.length - 1 }"
+              class="text-glow"
+            >
+              {{ word }}<span v-if="wi < secondLine.length - 1">&nbsp;</span>
+            </span>
+          </p>
+        </AnimatedContent>
       </h1>
 
       <div class="hero-meta mt-9 flex flex-col items-center gap-5">
         <!-- Fixed width, left-aligned: sizing to the current text would make
              the panel breathe in and out on every keystroke. Width is set from
              the longest string in the set. -->
-        <div
+        <!-- <div
           class="cut-10 w-[min(88vw,20rem)] border border-silver-700/80 bg-void-800/60 px-4 py-2.5 text-left backdrop-blur-sm"
         >
           <TextType :text="[...profile.typed]" class="font-mono text-xs text-cyan-200 sm:text-sm" />
-        </div>
+        </div> -->
 
-        <p
+        <!-- <p
           class="max-w-md text-center font-mono text-[0.62rem] uppercase tracking-[0.34em] text-silver-400"
         >
           {{ site.tagline }}
-        </p>
+        </p> -->
       </div>
     </div>
 
@@ -146,8 +179,7 @@ function next() {
       aria-label="Scroll to next section"
       @click="next"
     >
-      <span class="font-mono text-[0.6rem] uppercase tracking-[0.3em]">scroll</span>
-      <span class="i-lucide-chevron-down animate-bounce text-2xl" aria-hidden="true" />
+      <span class="i-lucide-chevron-down animate-flicker text-6xl" aria-hidden="true" />
     </button>
   </section>
 </template>

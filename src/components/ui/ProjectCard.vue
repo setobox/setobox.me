@@ -45,95 +45,95 @@ const showCover = computed(() => Boolean(props.project.cover) && !coverFailed.va
     :duration="1.1"
     :threshold="0.14"
   >
-    <Magnet :padding="160" :magnet-strength="48">
-      <a :href="project.href" target="_blank" rel="noopener noreferrer" class="cursor-target block">
-        <SpotlightCard
-          class="cut-18 group border border-silver-700/80 bg-void-800/80 backdrop-blur-md transition-all duration-500 ease-hex hover:border-violet-500/70"
+    <Magnet :padding="200" :disabled="false" :magnet-strength="30" w-full>
+      <SpotlightCard
+        class="cut-18 group border border-silver-700/80 bg-void-800/80 backdrop-blur-md transition-all duration-500 ease-hex hover:border-violet-500/70"
+      >
+        <div
+          class="relative z-2 flex flex-col md:flex-row"
+          :class="{ 'md:flex-row-reverse': flip }"
         >
+          <!-- Cover -->
           <div
-            class="relative z-2 flex flex-col md:flex-row"
-            :class="{ 'md:flex-row-reverse': flip }"
+            class="relative aspect-16/10 w-full shrink-0 overflow-hidden md:aspect-auto md:min-h-[240px] md:w-[min(32vw,310px)]"
           >
-            <!-- Cover -->
-            <div
-              class="relative aspect-16/10 w-full shrink-0 overflow-hidden md:aspect-auto md:min-h-[240px] md:w-[min(32vw,310px)]"
-            >
-              <!-- Absolute so the cover fills whatever height the copy column
+            <!-- Absolute so the cover fills whatever height the copy column
                    dictates on desktop, instead of forcing a square that leaves
                    a tall band of dead space beside short descriptions. -->
-              <img
-                v-if="showCover"
-                :src="project.cover"
-                :alt="`${project.title} cover`"
-                loading="lazy"
-                decoding="async"
-                class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-hex group-hover:scale-105"
-                @error="coverFailed = true"
-              />
-              <!-- Procedural fallback: a hexagon field in the project's own hue. -->
-              <div
-                v-else
-                class="absolute inset-0 h-full w-full transition-transform duration-700 ease-hex group-hover:scale-105"
-                :style="{
-                  background: `radial-gradient(120% 120% at 25% 15%, hsl(${hue} 80% 42% / 55%), transparent 60%), radial-gradient(100% 100% at 85% 90%, hsl(${hue + 60} 85% 50% / 40%), transparent 55%), #0A0722`,
-                }"
-              >
-                <div class="grid h-full w-full place-items-center">
-                  <span
-                    class="i-lucide-hexagon text-6xl opacity-25"
-                    :style="{ color: `hsl(${hue} 90% 75%)` }"
-                    aria-hidden="true"
-                  />
-                </div>
-              </div>
-              <!-- Colour wash that clears on hover. -->
-              <div
-                class="pointer-events-none absolute inset-0 bg-void-900/55 transition-opacity duration-700 ease-hex group-hover:opacity-0"
-              />
-            </div>
-
-            <!-- Copy -->
+            <img
+              v-if="showCover"
+              :src="project.cover"
+              :alt="`${project.title} cover`"
+              loading="lazy"
+              decoding="async"
+              class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-hex group-hover:scale-105"
+              @error="coverFailed = true"
+            />
+            <!-- Procedural fallback: a hexagon field in the project's own hue. -->
             <div
-              class="flex flex-1 flex-col gap-4 border-t-2 border-silver-700/70 p-6 md:border-t-0 md:p-8"
-              :class="flip ? 'md:border-r-2' : 'md:border-l-2'"
+              v-else
+              class="absolute inset-0 h-full w-full transition-transform duration-700 ease-hex group-hover:scale-105"
+              :style="{
+                background: `radial-gradient(120% 120% at 25% 15%, hsl(${hue} 80% 42% / 55%), transparent 60%), radial-gradient(100% 100% at 85% 90%, hsl(${hue + 60} 85% 50% / 40%), transparent 55%), #0A0722`,
+              }"
             >
-              <div class="flex items-start justify-between gap-4">
-                <h3
-                  class="font-display text-2xl font-light uppercase tracking-[0.06em] text-silver-50 transition-all duration-300 group-hover:glow-14 md:text-3xl"
-                >
-                  {{ project.title }}
-                </h3>
+              <div class="grid h-full w-full place-items-center">
                 <span
-                  class="i-lucide-arrow-up-right shrink-0 text-xl text-silver-500 transition-all duration-400 ease-hex group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-violet-300"
+                  class="i-lucide-hexagon text-6xl opacity-25"
+                  :style="{ color: `hsl(${hue} 90% 75%)` }"
                   aria-hidden="true"
                 />
               </div>
+            </div>
+            <!-- Colour wash that clears on hover. -->
+            <div
+              class="pointer-events-none absolute inset-0 bg-void-900/55 transition-opacity duration-700 ease-hex group-hover:opacity-0"
+            />
+          </div>
 
-              <div class="flex flex-wrap gap-2">
+          <!-- Copy -->
+          <div
+            class="flex flex-1 flex-col gap-4 border-t-2 border-silver-700/70 p-6 md:border-t-0 md:p-8"
+            :class="flip ? 'md:border-r-2' : 'md:border-l-2'"
+          >
+            <a :href="project.href" target="_blank" rel="noopener noreferrer" class="block">
+              <div class="flex gap-4 w-fit cursor-target">
                 <span
-                  v-for="tag in project.tags"
-                  :key="tag"
-                  class="cut-tr-6 border border-violet-500/40 bg-violet-600/12 px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-violet-200"
+                  class="font-display text-2xl font-light uppercase tracking-[0.06em] text-silver-50 transition-all duration-300 group-hover:glow-14 md:text-3xl"
                 >
-                  {{ tag }}
+                  {{ project.title }}
                 </span>
+                <span
+                  class="i-lucide-arrow-up-right shrink-0 text-xl text-silver-500 transition-all duration-400 ease-hex group-hover:translate-x-1 group-hover:text-violet-300"
+                  aria-hidden="true"
+                />
               </div>
+            </a>
 
-              <div class="space-y-2 border-t border-silver-700/60 pt-4">
-                <p v-for="(d, i) in project.desc" :key="i" class="body-text text-sm md:text-base">
-                  {{ d }}
-                </p>
-              </div>
-
-              <p
-                class="mt-auto pt-4 font-mono text-[0.66rem] uppercase tracking-[0.24em] text-silver-500"
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="tag in project.tags"
+                :key="tag"
+                class="cut-tr-6 border border-violet-500/40 bg-violet-600/12 px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-violet-200"
               >
-                Started {{ project.date }}
+                {{ tag }}
+              </span>
+            </div>
+
+            <div class="space-y-2 border-t border-silver-700/60 pt-4">
+              <p v-for="(d, i) in project.desc" :key="i" class="body-text text-sm md:text-base">
+                {{ d }}
               </p>
             </div>
+
+            <p
+              class="mt-auto pt-4 font-mono text-[0.66rem] uppercase tracking-[0.24em] text-silver-500"
+            >
+              Started {{ project.date }}
+            </p>
           </div>
-        </SpotlightCard>
-      </a>
+        </div>
+      </SpotlightCard>
     </Magnet>
   </AnimatedContent>
 </template>

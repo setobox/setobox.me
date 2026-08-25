@@ -14,6 +14,14 @@ import SectionHeading from "@/components/ui/SectionHeading.vue";
 import { scrollReveal, useGSAP } from "@/composables/useGSAP";
 import { infoRows, profile } from "@/data/profile";
 
+interface Props {
+  intro?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  intro: true,
+});
+
 const root = useTemplateRef<HTMLElement>("root");
 
 useGSAP(
@@ -64,7 +72,7 @@ useGSAP(
                 aria-hidden="true"
               />
               <dt
-                class="w-24 shrink-0 font-mono text-[0.62rem] uppercase tracking-[0.24em] text-violet-300 sm:w-28"
+                class="w-24 shrink-0 font-mono text-base uppercase tracking-[0.14em] text-violet-300 sm:w-28"
               >
                 {{ row.label }}
               </dt>
@@ -80,7 +88,7 @@ useGSAP(
             >
               <span class="i-lucide-layers shrink-0 text-base text-silver-600" aria-hidden="true" />
               <dt
-                class="w-24 shrink-0 font-mono text-[0.62rem] uppercase tracking-[0.24em] text-violet-300 sm:w-28"
+                class="w-24 shrink-0 font-mono text-base uppercase tracking-[0.24em] text-violet-300 sm:w-28"
               >
                 A.K.A.
               </dt>
@@ -97,7 +105,7 @@ useGSAP(
           </dl>
 
           <!-- Intro prose -->
-          <AnimatedContent :distance="30" :duration="0.9" :threshold="0.1">
+          <AnimatedContent v-if="intro" :distance="30" :duration="0.9" :threshold="0.1">
             <div
               class="intro-block relative cut-14 border border-silver-800 bg-void-800/50 p-6 backdrop-blur-sm sm:p-8"
             >

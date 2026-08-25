@@ -201,7 +201,7 @@ export default defineConfig({
   shortcuts: [
     // — Layout ————————————————————————————————————————————————
     ["container-page", "w-full max-w-1400px mx-auto px-5 sm:px-8 lg:px-12"],
-    ["section-y", "py-16 md:py-20 lg:py-26"],
+    ["section-y", "py-20 md:py-40 lg:py-48"],
 
     // — Type ——————————————————————————————————————————————————
     [
@@ -216,7 +216,9 @@ export default defineConfig({
     ["panel-hover", "transition-all duration-500 ease-hex hover:border-violet-500/70"],
 
     // — Interaction ————————————————————————————————————————————
-    ["link-glow", "transition-all duration-300 ease-hex hover:text-violet-300 hover:glow-12"],
+    ["cursor-target", "cursor-none select-none"],
+    ["text-glow", "transition-text-shadow duration-300 ease-hex hover:glow-15"],
+    ["link-glow", "transition-all duration-300 ease-hex hover:text-violet-300 hover:glow-15"],
     [
       "btn-hex",
       "inline-flex items-center gap-2 px-6 py-3 font-display text-sm uppercase tracking-[0.18em] cut-10 bg-violet-600/20 text-silver-100 border border-violet-500/60 transition-all duration-300 ease-hex hover:bg-violet-500/35 hover:text-white hover:border-violet-300",

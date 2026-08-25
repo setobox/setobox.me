@@ -39,25 +39,32 @@ useGSAP(
         <!-- Primary: email -->
         <AnimatedContent :distance="40" :duration="1" :threshold="0.12">
           <TiltedCard :max="6">
-            <a
-              :href="`mailto:${profile.email}`"
-              class="group relative block cut-20 border border-violet-500/40 bg-void-800/70 p-8 backdrop-blur-md sm:p-12"
+            <ElectricBorder
+              color="#8B5CF6"
+              :chaos="0.04"
+              :speed="1"
+              :border-radius="4"
+              :thickness="2"
             >
-              <ElectricBorder color="#8B5CF6" :chaos="0.3" :speed="0.8" :radius="0" />
-              <div class="relative z-2 flex flex-col items-center gap-4 text-center">
-                <span
-                  class="i-lucide-mail text-4xl text-violet-300 transition-transform duration-500 ease-hex group-hover:scale-110"
-                  aria-hidden="true"
-                />
-                <p class="label-mono">drop a line</p>
-                <p
-                  class="cursor-target break-all font-display text-xl tracking-[0.04em] text-silver-50 transition-all duration-300 group-hover:glow-16 sm:text-3xl"
-                >
-                  {{ profile.email }}
-                </p>
-                <p class="body-text max-w-md text-sm">……</p>
-              </div>
-            </a>
+              <a
+                :href="`mailto:${profile.email}`"
+                class="group relative block border border-violet-500/40 bg-void-800/70 p-8 backdrop-blur-md sm:p-12"
+              >
+                <div class="relative z-2 flex flex-col items-center gap-4 text-center">
+                  <span
+                    class="i-lucide-mail text-4xl text-violet-300 transition-transform duration-500 ease-hex group-hover:scale-110"
+                    aria-hidden="true"
+                  />
+                  <p class="label-mono">drop a line</p>
+                  <p
+                    class="cursor-target break-all font-display text-xl tracking-[0.04em] text-silver-50 transition-all duration-300 group-hover:glow-16 sm:text-3xl"
+                  >
+                    {{ profile.email }}
+                  </p>
+                  <p class="body-text max-w-md text-sm">……</p>
+                </div>
+              </a>
+            </ElectricBorder>
           </TiltedCard>
         </AnimatedContent>
 
@@ -77,7 +84,7 @@ useGSAP(
               aria-hidden="true"
             />
             <span
-              class="font-display text-sm uppercase tracking-[0.14em] text-silver-200 transition-colors duration-400 group-hover:text-white"
+              class="font-display text-sm uppercase tracking-[0.14em] text-silver-200 transition-colors duration-400 group-hover:text-white group-hover:glow-15"
             >
               {{ s.name }}
             </span>

@@ -1,99 +1,182 @@
 <script setup lang="ts">
-/**
- * TextType - typewriter that cycles through a list of strings.
- *
- * Drives a single reactive string with `setTimeout` rather than one timer per
- * character, so pausing or unmounting mid-word cancels exactly one handle.
- */
-import { computed, onMounted, onUnmounted, ref } from "vue";
-import { prefersReducedMotion } from "@/composables/useGSAP";
+import { ref, onMounted, onBeforeUnmount, watch, computed, useTemplateRef } from "vue";
+import { gsap } from "gsap";
 
-interface Props {
-  text: string[];
-  /** Milliseconds per character typed. */
-  typingSpeed?: number;
-  /** Milliseconds per character deleted. */
-  deletingSpeed?: number;
-  /** Milliseconds held at the end of a complete string. */
-  pauseDuration?: number;
+interface TextTypeProps {
+  className?: string;
   showCursor?: boolean;
-  cursorChar?: string;
-  /** Stop after the last string rather than looping. */
-  once?: boolean;
+  hideCursorWhileTyping?: boolean;
+  cursorCharacter?: string;
+  cursorBlinkDuration?: number;
+  cursorClassName?: string;
+  text: string | string[];
+  as?: string;
+  typingSpeed?: number;
+  initialDelay?: number;
+  pauseDuration?: number;
+  deletingSpeed?: number;
+  loop?: boolean;
+  textColors?: string[];
+  variableSpeed?: { min: number; max: number };
+  onSentenceComplete?: (sentence: string, index: number) => void;
+  startOnVisible?: boolean;
+  reverseMode?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  typingSpeed: 62,
-  deletingSpeed: 28,
-  pauseDuration: 1900,
+const props = withDefaults(defineProps<TextTypeProps>(), {
+  as: "div",
+  typingSpeed: 50,
+  initialDelay: 0,
+  pauseDuration: 2000,
+  deletingSpeed: 30,
+  loop: true,
+  className: "",
   showCursor: true,
-  cursorChar: "_",
-  once: false,
+  hideCursorWhileTyping: false,
+  cursorCharacter: "|",
+  cursorBlinkDuration: 0.5,
+  textColors: () => [],
+  startOnVisible: false,
+  reverseMode: false,
 });
 
-const shown = ref("");
-const index = ref(0);
-const deleting = ref(false);
-const done = ref(false);
+const displayedText = ref("");
+const currentCharIndex = ref(0);
+const isDeleting = ref(false);
+const currentTextIndex = ref(0);
+const isVisible = ref(!props.startOnVisible);
+const cursorRef = useTemplateRef("cursorRef");
+const containerRef = useTemplateRef("containerRef");
 
-let timer = 0;
+const textArray = computed(() => (Array.isArray(props.text) ? props.text : [props.text]));
 
-const current = computed(() => props.text[index.value % props.text.length] ?? "");
+const getRandomSpeed = () => {
+  if (!props.variableSpeed) return props.typingSpeed;
+  const { min, max } = props.variableSpeed;
+  return Math.random() * (max - min) + min;
+};
 
-function tick() {
-  const full = current.value;
+const getCurrentTextColor = () => {
+  if (!props.textColors.length) return "#ffffff";
+  return props.textColors[currentTextIndex.value % props.textColors.length];
+};
 
-  if (!deleting.value) {
-    if (shown.value.length < full.length) {
-      shown.value = full.slice(0, shown.value.length + 1);
-      timer = window.setTimeout(tick, props.typingSpeed);
-      return;
+let timeout: ReturnType<typeof setTimeout> | null = null;
+
+const clearTimeoutIfNeeded = () => {
+  if (timeout) clearTimeout(timeout);
+};
+
+const executeTypingAnimation = () => {
+  const currentText = textArray.value[currentTextIndex.value] ?? "";
+  const processedText = props.reverseMode ? currentText.split("").reverse().join("") : currentText;
+
+  if (isDeleting.value) {
+    if (displayedText.value === "") {
+      isDeleting.value = false;
+      if (currentTextIndex.value === textArray.value.length - 1 && !props.loop) return;
+
+      props.onSentenceComplete?.(
+        textArray.value[currentTextIndex.value] ?? "",
+        currentTextIndex.value,
+      );
+
+      currentTextIndex.value = (currentTextIndex.value + 1) % textArray.value.length;
+      currentCharIndex.value = 0;
+      timeout = setTimeout(() => {}, props.pauseDuration);
+    } else {
+      timeout = setTimeout(() => {
+        displayedText.value = displayedText.value.slice(0, -1);
+      }, props.deletingSpeed);
     }
-
-    const isLast = index.value === props.text.length - 1;
-    if (props.once && isLast) {
-      done.value = true;
-      return;
+  } else {
+    if (currentCharIndex.value < processedText.length) {
+      timeout = setTimeout(
+        () => {
+          displayedText.value += processedText[currentCharIndex.value];
+          currentCharIndex.value += 1;
+        },
+        props.variableSpeed ? getRandomSpeed() : props.typingSpeed,
+      );
+    } else if (textArray.value.length > 1) {
+      timeout = setTimeout(() => {
+        isDeleting.value = true;
+      }, props.pauseDuration);
     }
-
-    deleting.value = true;
-    timer = window.setTimeout(tick, props.pauseDuration);
-    return;
   }
+};
 
-  if (shown.value.length > 0) {
-    shown.value = full.slice(0, shown.value.length - 1);
-    timer = window.setTimeout(tick, props.deletingSpeed);
-    return;
-  }
+watch(
+  [displayedText, currentCharIndex, isDeleting, isVisible],
+  () => {
+    if (!isVisible.value) return;
+    clearTimeoutIfNeeded();
 
-  deleting.value = false;
-  index.value = (index.value + 1) % props.text.length;
-  timer = window.setTimeout(tick, props.typingSpeed * 3);
-}
+    if (currentCharIndex.value === 0 && !isDeleting.value && displayedText.value === "") {
+      timeout = setTimeout(() => {
+        executeTypingAnimation();
+      }, props.initialDelay);
+    } else {
+      executeTypingAnimation();
+    }
+  },
+  { immediate: true },
+);
 
 onMounted(() => {
-  // Reduced motion gets the finished first string, no animation.
-  if (prefersReducedMotion()) {
-    shown.value = props.text[0] ?? "";
-    done.value = true;
-    return;
+  if (props.showCursor && cursorRef.value) {
+    gsap.set(cursorRef.value, { opacity: 1 });
+    gsap.to(cursorRef.value, {
+      opacity: 0,
+      duration: props.cursorBlinkDuration,
+      repeat: -1,
+      yoyo: true,
+      ease: "power2.inOut",
+    });
   }
-  timer = window.setTimeout(tick, 420);
+
+  if (props.startOnVisible && containerRef.value) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) isVisible.value = true;
+        });
+      },
+      { threshold: 0.1 },
+    );
+    if (containerRef.value instanceof Element) {
+      observer.observe(containerRef.value);
+    }
+    onBeforeUnmount(() => observer.disconnect());
+  }
 });
 
-onUnmounted(() => window.clearTimeout(timer));
+onBeforeUnmount(() => {
+  clearTimeoutIfNeeded();
+});
 </script>
 
 <template>
-  <span class="inline-flex items-baseline">
-    <span>{{ shown }}</span>
+  <component
+    :is="as"
+    ref="containerRef"
+    :class="`inline-block whitespace-pre-wrap tracking-tight ${className}`"
+    v-bind="$attrs"
+  >
+    <span class="inline" :style="{ color: getCurrentTextColor() }">
+      {{ displayedText }}
+    </span>
     <span
-      v-if="showCursor && !done"
-      class="ml-[0.12em] text-violet-400"
-      :class="{ 'animate-flicker': true }"
-      aria-hidden="true"
-      >{{ cursorChar }}</span
+      v-if="showCursor"
+      ref="cursorRef"
+      :class="`ml-1 inline-block opacity-100 ${
+        hideCursorWhileTyping &&
+        (currentCharIndex < (textArray[currentTextIndex] ?? '').length || isDeleting)
+          ? 'hidden'
+          : ''
+      } ${cursorClassName}`"
     >
-  </span>
+      {{ cursorCharacter }}
+    </span>
+  </component>
 </template>

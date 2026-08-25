@@ -2,9 +2,10 @@ import { fileURLToPath, URL } from "node:url";
 import vue from "@vitejs/plugin-vue";
 import UnoCSS from "unocss/vite";
 import { defineConfig } from "vite-plus";
+import { cloudflare } from "@cloudflare/vite-plugin";
 
 export default defineConfig({
-  plugins: [vue(), UnoCSS()],
+  plugins: [vue(), UnoCSS(), cloudflare()],
 
   resolve: {
     alias: {

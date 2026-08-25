@@ -1,0 +1,12 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "name": "setobox-home",
+  "compatibility_date": "2026-08-20",
+  "assets": {
+    "directory": "./dist/",
+    "not_found_handling": "single-page-application",
+  },
+}

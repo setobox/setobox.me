@@ -1,6 +1,4 @@
 {
-  "name": "setobox-home",
-  "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,31 +6,35 @@
     "build": "vue-tsc --build && vp build",
     "preview": "vp preview",
     "typecheck": "vue-tsc --build",
-    "prepare": "vp config"
+    "prepare": "vp config",
+    "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
     "gsap": "catalog:frontend",
     "lenis": "catalog:frontend",
+    "motion-v": "catalog:frontend",
     "vue": "catalog:frontend",
     "vue-router": "catalog:frontend"
   },
   "devDependencies": {
     "@antfu/ni": "^30.5.0",
+    "@cloudflare/vite-plugin": "catalog:build",
     "@iconify-json/lucide": "catalog:dev",
     "@iconify-json/simple-icons": "catalog:dev",
+    "@tsconfig/node24": "catalog:build",
     "@types/node": "catalog:dev",
     "@vitejs/plugin-vue": "catalog:dev",
+    "@vue/tsconfig": "catalog:build",
+    "@vueuse/core": "catalog:dev",
     "typescript": "~6.0.2",
     "unocss": "catalog:dev",
-    "vite": "catalog:",
-    "vite-plus": "catalog:",
-    "vue-tsc": "catalog:dev"
+    "vite": "catalog:build",
+    "vite-plus": "catalog:build",
+    "vue-tsc": "catalog:dev",
+    "wrangler": "catalog:build"
   },
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "11.23.0",
-      "onFail": "download"
-    }
-  }
+  "engines": {
+    "node": "^22.18.0 || >=24.12.0"
+  },
+  "packageManager": "pnpm@11.23.0"
 }

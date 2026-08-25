@@ -8,6 +8,7 @@ import ElectricBorder from "@/components/bits/ElectricBorder.vue";
 import FadeContent from "@/components/bits/FadeContent.vue";
 import HexTile from "@/components/ui/HexTile.vue";
 import SectionHeading from "@/components/ui/SectionHeading.vue";
+import TextType from "@/components/bits/TextType.vue";
 import { infoRows, profile, roles, socials, stack } from "@/data/profile";
 
 const detailRows = [
@@ -25,9 +26,15 @@ const detailRows = [
       <!-- Portrait + identity table -->
       <div class="mt-16 flex flex-col gap-12 lg:mt-20 lg:flex-row lg:gap-16">
         <FadeContent :blur="true" :duration="1000" :delay="100">
-          <div class="relative mx-auto h-[300px] w-[260px] lg:mx-0">
-            <ElectricBorder color="#4CD9F5" :chaos="0.32" :speed="1" hexagon />
-            <div class="absolute inset-[6px] hex-point overflow-hidden bg-void-800">
+          <ElectricBorder
+            color="#8B5CF6"
+            :chaos="0.04"
+            :speed="1"
+            :thickness="3"
+            hexagon
+            class-name="mx-auto h-[300px] w-[260px] lg:mx-0"
+          >
+            <div class="h-[300px] w-[260px] hex-point overflow-hidden bg-void-800">
               <img
                 :src="profile.avatar"
                 :alt="`${profile.handle} avatar`"
@@ -36,7 +43,7 @@ const detailRows = [
                 decoding="async"
               />
             </div>
-          </div>
+          </ElectricBorder>
         </FadeContent>
 
         <div class="flex-1">
@@ -53,7 +60,7 @@ const detailRows = [
                 {{ row.label }}
               </dt>
               <dd
-                class="break-all font-display text-base tracking-[0.03em] text-silver-100 transition-all duration-300 group-hover:glow-10"
+                class="break-all font-display text-base tracking-[0.03em] text-silver-100 text-glow"
               >
                 {{ row.value }}
               </dd>
@@ -96,6 +103,22 @@ const detailRows = [
             <HexTile :label="tech.name" :accent="tech.key" :size="86" />
           </div>
         </div>
+      </div>
+
+      <!-- Interests -->
+      <div class="mt-24">
+        <SectionHeading title="INTERESTS" kicker="off the clock" icon="i-lucide-sparkles" />
+        <AnimatedContent :distance="30" :duration="0.9" class="mt-12">
+          <div
+            class="mx-auto max-w-3xl cut-16 border border-silver-800 bg-void-800/50 p-8 backdrop-blur-sm"
+          >
+            <p class="body-text leading-loose">喜欢新奇的事物，痴迷于技术与艺术的结合。</p>
+            <p class="body-text leading-loose">......</p>
+            <p class="mt-6 font-mono text-xs text-cyan-200">
+              <TextType :text="['// coding.', '// learning.', '// exploring.', '// exercising.']" />
+            </p>
+          </div>
+        </AnimatedContent>
       </div>
 
       <!-- All links -->

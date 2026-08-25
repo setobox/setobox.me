@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
-import ScrambleText from "@/components/bits/ScrambleText.vue";
+import DecryptedText from "@/components/bits/DecryptedText.vue";
 import { gsap, useGSAP } from "@/composables/useGSAP";
 
 const root = useTemplateRef<HTMLElement>("root");
@@ -63,7 +63,7 @@ useGSAP(
       </h1>
 
       <p class="font-mono text-xs uppercase tracking-[0.3em] text-violet-300">
-        <ScrambleText text="BOX NOT FOUND" />
+        <DecryptedText text="BOX NOT FOUND" />
       </p>
       <p class="body-text max-w-sm text-sm">
         这个格子是空的……也许它还没有被造出来，或者已经被搬走了。

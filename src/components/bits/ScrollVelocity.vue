@@ -1,183 +1,232 @@
 <script setup lang="ts">
-/**
- * ScrollVelocity - marquee rows whose speed and direction bend with scroll.
- *
- * Each row drifts at a constant base velocity; scrolling adds a spring-damped
- * boost, and scrolling *up* flips the direction. Rows alternate their base
- * direction so the block reads as counter-rotating bands.
- *
- * The x offset is wrapped against the measured width of a single copy, so the
- * loop is seamless at any font size without hardcoding a duplicate count.
- */
-import { computed, onMounted, onUnmounted, ref } from "vue";
-import { prefersReducedMotion } from "@/composables/useGSAP";
+import { ref, computed, onMounted, onUnmounted, nextTick, type ComponentPublicInstance } from "vue";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-interface Props {
-  texts?: string[];
-  /** Base drift in px/s. */
-  velocity?: number;
-  className?: string;
-  /** 0-1000; higher settles the velocity boost faster. */
-  damping?: number;
-  /** 0-1000; higher makes the boost react more sharply to scroll. */
-  stiffness?: number;
-  /** Scroll speed (px/s) mapped onto a velocity multiplier. */
-  velocityMapping?: { input: [number, number]; output: [number, number] };
+gsap.registerPlugin(ScrollTrigger);
+
+interface VelocityMapping {
+  input: [number, number];
+  output: [number, number];
 }
 
-const props = withDefaults(defineProps<Props>(), {
+interface ScrollVelocityProps {
+  scrollContainerRef?: HTMLElement | null;
+  texts?: string[];
+  velocity?: number;
+  className?: string;
+  damping?: number;
+  stiffness?: number;
+  velocityMapping?: VelocityMapping;
+  parallaxClassName?: string;
+  scrollerClassName?: string;
+  parallaxStyle?: Record<string, string | number>;
+  scrollerStyle?: Record<string, string | number>;
+}
+
+const props = withDefaults(defineProps<ScrollVelocityProps>(), {
   texts: () => [],
-  velocity: 90,
+  velocity: 100,
   className: "",
   damping: 50,
   stiffness: 400,
-  velocityMapping: () => ({ input: [0, 1000], output: [0, 4] }),
+  velocityMapping: () => ({ input: [0, 1000], output: [0, 5] }),
+  parallaxClassName: "",
+  scrollerClassName: "",
+  parallaxStyle: () => ({}),
+  scrollerStyle: () => ({}),
 });
 
-// Function refs rather than `ref="name"`: the copies live in a nested v-for, so
-// a shared string ref would flatten every row's copies into one array. We only
-// need the *first* copy of each row to measure against.
-const rows: (HTMLElement | null)[] = [];
-const firstCopies: (HTMLElement | null)[] = [];
+const containerRef = ref<HTMLDivElement[]>([]);
+const copyRefs = ref<HTMLSpanElement[]>([]);
 
-const setRow = (el: unknown, i: number) => {
-  rows[i] = (el as HTMLElement | null) ?? null;
-};
-const setCopy = (el: unknown, i: number) => {
-  firstCopies[i] = (el as HTMLElement | null) ?? null;
-};
-
-const offsets = ref<number[]>([]);
+const baseX = ref<number[]>([]);
+const scrollVelocity = ref(0);
+const smoothVelocity = ref(0);
+const velocityFactor = ref(0);
 const copyWidths = ref<number[]>([]);
-const copyCounts = ref<number[]>([]);
+const directionFactors = ref<number[]>([]);
+const calculatedCopies = ref<number[]>([]);
 
-const directions: number[] = [];
-let rafId = 0;
-let resizeObserver: ResizeObserver | null = null;
-let scrollVelocity = 0;
-let smoothVelocity = 0;
-let velocityFactor = 0;
+let rafId: number | null = null;
+let scrollTriggerInstance: ScrollTrigger | null = null;
 let lastScrollY = 0;
-let lastScrollT = 0;
-let lastFrameT = 0;
+let lastTime = 0;
+let resizeTimeout: number | null = null;
 
-const transforms = computed(() =>
-  props.texts.map((_, i) => {
-    const w = copyWidths.value[i] ?? 0;
-    if (w === 0) return "translateX(0px)";
-    // Wrap into [-w, 0) so the strip never runs out of copies.
-    const v = offsets.value[i] ?? 0;
-    return `translateX(${(((v % w) + w) % w) - w}px)`;
-  }),
-);
-
-function measure() {
-  const widths = copyWidths.value.slice();
-  const counts = copyCounts.value.slice();
-
-  props.texts.forEach((_, i) => {
-    const copy = firstCopies[i];
-    const row = rows[i];
-    if (!copy || !row) return;
-
-    const single = copy.offsetWidth;
-    if (single === 0) return;
-
-    widths[i] = single;
-    // Enough copies to cover the row twice over, so wrapping is invisible.
-    counts[i] = Math.max(Math.ceil((row.offsetWidth * 2.2) / single), 4);
-  });
-
-  copyWidths.value = widths;
-  copyCounts.value = counts;
-}
-
-function frame(now: number) {
-  rafId = requestAnimationFrame(frame);
-  if (lastFrameT === 0) lastFrameT = now;
-  const dt = Math.min(now - lastFrameT, 50);
-  lastFrameT = now;
-
-  // Spring-damp the raw scroll velocity into something usable.
-  smoothVelocity += (scrollVelocity - smoothVelocity) * (props.stiffness / 1000);
-  smoothVelocity *= 1 - props.damping / 1000;
-
-  const { input, output } = props.velocityMapping;
-  const span = input[1] - input[0] || 1;
-  const norm = Math.min(Math.max((Math.abs(smoothVelocity) - input[0]) / span, 0), 1);
-  velocityFactor = (output[0] + norm * (output[1] - output[0])) * (smoothVelocity < 0 ? -1 : 1);
-
-  const next = offsets.value.slice();
-  props.texts.forEach((_, i) => {
-    // Odd rows travel the other way, giving the counter-rotating band effect.
-    const base = i % 2 === 0 ? props.velocity : -props.velocity;
-
-    if (velocityFactor < 0) directions[i] = -1;
-    else if (velocityFactor > 0) directions[i] = 1;
-
-    const dir = directions[i] ?? 1;
-    next[i] = (next[i] ?? 0) + dir * base * (dt / 1000) * (1 + Math.abs(velocityFactor));
-  });
-  offsets.value = next;
-}
-
-function onScroll() {
-  const now = performance.now();
-  const y = window.scrollY;
-  const dt = now - lastScrollT;
-  if (dt > 0) scrollVelocity = ((y - lastScrollY) / dt) * 1000;
-  lastScrollY = y;
-  lastScrollT = now;
-}
-
-onMounted(() => {
-  const n = props.texts.length;
-  offsets.value = Array.from({ length: n }, () => 0);
-  copyWidths.value = Array.from({ length: n }, () => 0);
-  copyCounts.value = Array.from({ length: n }, () => 6);
-  for (let i = 0; i < n; i++) directions[i] = 1;
-
-  measure();
-  // Re-measure once webfonts land; Orbitron changes widths substantially.
-  document.fonts?.ready.then(measure).catch(() => {});
-
-  resizeObserver = new ResizeObserver(() => measure());
-  for (const el of firstCopies) if (el) resizeObserver.observe(el);
-
-  if (!prefersReducedMotion()) {
-    lastScrollY = window.scrollY;
-    lastScrollT = performance.now();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    rafId = requestAnimationFrame(frame);
+const setCopyRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  if (el && el instanceof HTMLSpanElement) {
+    copyRefs.value[index] = el;
   }
+};
+
+const updateWidths = () => {
+  props.texts.forEach((_, index) => {
+    if (copyRefs.value[index] && containerRef.value[index]) {
+      const singleCopyWidth = copyRefs.value[index].offsetWidth;
+      const containerWidth = containerRef.value[index].offsetWidth;
+      const viewportWidth = window.innerWidth;
+
+      const effectiveWidth = Math.max(containerWidth, viewportWidth);
+      const minCopies = Math.ceil((effectiveWidth * 2.5) / singleCopyWidth);
+      const optimalCopies = Math.max(minCopies, 8);
+
+      copyWidths.value[index] = singleCopyWidth;
+      calculatedCopies.value[index] = optimalCopies;
+    }
+  });
+};
+
+const debouncedUpdateWidths = () => {
+  if (resizeTimeout) {
+    clearTimeout(resizeTimeout);
+  }
+  resizeTimeout = window.setTimeout(() => {
+    updateWidths();
+    resizeTimeout = null;
+  }, 150);
+};
+
+const wrap = (min: number, max: number, v: number): number => {
+  const range = max - min;
+  if (range === 0) return min;
+  const mod = (((v - min) % range) + range) % range;
+  return mod + min;
+};
+
+const scrollTransforms = computed(() => {
+  return props.texts.map((_, index) => {
+    const singleWidth = copyWidths.value[index];
+    if (singleWidth === undefined || singleWidth === 0) return "0px";
+    return `${wrap(-singleWidth, 0, baseX.value[index] || 0)}px`;
+  });
+});
+
+const updateSmoothVelocity = () => {
+  const dampingFactor = props.damping / 1000;
+  const stiffnessFactor = props.stiffness / 1000;
+
+  const velocityDiff = scrollVelocity.value - smoothVelocity.value;
+  smoothVelocity.value += velocityDiff * stiffnessFactor;
+  smoothVelocity.value *= 1 - dampingFactor;
+};
+
+const updateVelocityFactor = () => {
+  const { input, output } = props.velocityMapping;
+  const inputRange = input[1] - input[0];
+  const outputRange = output[1] - output[0];
+
+  let normalizedVelocity = (Math.abs(smoothVelocity.value) - input[0]) / inputRange;
+  normalizedVelocity = Math.max(0, Math.min(1, normalizedVelocity));
+
+  velocityFactor.value = output[0] + normalizedVelocity * outputRange;
+  if (smoothVelocity.value < 0) velocityFactor.value *= -1;
+};
+
+const animate = (currentTime: number) => {
+  if (lastTime === 0) lastTime = currentTime;
+  const delta = currentTime - lastTime;
+  lastTime = currentTime;
+
+  updateSmoothVelocity();
+  updateVelocityFactor();
+
+  props.texts.forEach((_, index) => {
+    const baseVelocity = index % 2 !== 0 ? -props.velocity : props.velocity;
+
+    let moveBy = (directionFactors.value[index] || 1) * baseVelocity * (delta / 1000);
+
+    if (velocityFactor.value < 0) {
+      directionFactors.value[index] = -1;
+    } else if (velocityFactor.value > 0) {
+      directionFactors.value[index] = 1;
+    }
+
+    moveBy += (directionFactors.value[index] || 1) * moveBy * velocityFactor.value;
+    baseX.value[index] = (baseX.value[index] || 0) + moveBy;
+  });
+
+  rafId = requestAnimationFrame(animate);
+};
+
+const updateScrollVelocity = () => {
+  const container = props.scrollContainerRef || window;
+  const currentScrollY =
+    container === window ? window.scrollY : (container as HTMLElement).scrollTop;
+
+  const currentTime = performance.now();
+  const timeDelta = currentTime - lastTime;
+
+  if (timeDelta > 0) {
+    const scrollDelta = currentScrollY - lastScrollY;
+    scrollVelocity.value = (scrollDelta / timeDelta) * 1000;
+  }
+
+  lastScrollY = currentScrollY;
+};
+
+onMounted(async () => {
+  await nextTick();
+
+  baseX.value = Array.from<number>({ length: props.texts.length }).fill(0);
+  copyWidths.value = Array.from<number>({ length: props.texts.length }).fill(0);
+  calculatedCopies.value = Array.from<number>({ length: props.texts.length }).fill(15);
+  directionFactors.value = Array.from<number>({ length: props.texts.length }).fill(1);
+
+  setTimeout(() => {
+    updateWidths();
+  }, 100);
+
+  updateWidths();
+
+  if (containerRef.value && containerRef.value.length > 0) {
+    scrollTriggerInstance = ScrollTrigger.create({
+      trigger: containerRef.value[0],
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: updateScrollVelocity,
+      ...(props.scrollContainerRef && { scroller: props.scrollContainerRef }),
+    });
+  }
+
+  rafId = requestAnimationFrame(animate);
+
+  window.addEventListener("resize", debouncedUpdateWidths, { passive: true });
 });
 
 onUnmounted(() => {
-  cancelAnimationFrame(rafId);
-  resizeObserver?.disconnect();
-  window.removeEventListener("scroll", onScroll);
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+  }
+  if (scrollTriggerInstance) {
+    scrollTriggerInstance.kill();
+  }
+  if (resizeTimeout) {
+    clearTimeout(resizeTimeout);
+  }
+  window.removeEventListener("resize", debouncedUpdateWidths);
 });
 </script>
 
 <template>
-  <section class="select-none" aria-hidden="true">
+  <section>
     <div
       v-for="(text, index) in texts"
       :key="index"
-      :ref="(el) => setRow(el, index)"
-      class="relative overflow-hidden"
+      ref="containerRef"
+      :class="`${parallaxClassName} relative overflow-hidden`"
+      :style="parallaxStyle"
     >
       <div
-        class="flex whitespace-nowrap will-change-transform"
-        :style="{ transform: transforms[index] }"
+        ref="scrollerRef"
+        :class="`${scrollerClassName} flex whitespace-nowrap text-center font-sans text-4xl font-bold tracking-[-0.02em] drop-shadow md:text-[5rem] md:leading-[5rem]`"
+        :style="{ transform: `translateX(${scrollTransforms[index] || '0px'})`, ...scrollerStyle }"
       >
         <span
-          v-for="copy in copyCounts[index] ?? 6"
-          :key="copy"
-          :ref="copy === 1 ? (el) => setCopy(el, index) : undefined"
-          class="flex-shrink-0"
-          :class="className"
-          translate="no"
+          v-for="spanIndex in calculatedCopies[index] || 15"
+          :key="spanIndex"
+          :class="`flex-shrink-0 ${className}`"
+          :ref="spanIndex === 1 ? (el) => setCopyRef(el, index) : undefined"
         >
           {{ text }}&nbsp;
         </span>

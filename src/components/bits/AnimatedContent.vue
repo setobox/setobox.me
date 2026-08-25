@@ -1,102 +1,139 @@
 <script setup lang="ts">
-/**
- * AnimatedContent - slides its slot in from a direction when scrolled into
- * view (or immediately, with `alwaysPlay`).
- *
- * The workhorse reveal used across every section. Wraps rather than decorates
- * so the animated element is always a plain div GSAP fully owns - animating
- * content elements directly fights whatever transform they already carry.
- */
-import { useTemplateRef } from "vue";
-import { gsap, useGSAP } from "@/composables/useGSAP";
+import { onMounted, onUnmounted, watch, useTemplateRef } from "vue";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-interface Props {
+gsap.registerPlugin(ScrollTrigger);
+
+interface AnimatedContentProps {
   distance?: number;
   direction?: "vertical" | "horizontal";
-  /** Come from the opposite side (up instead of down, left instead of right). */
   reverse?: boolean;
   duration?: number;
-  ease?: string;
+  ease?: string | ((progress: number) => number);
   initialOpacity?: number;
   animateOpacity?: boolean;
-  /** Starting scale. 1 disables the scale part of the reveal. */
   scale?: number;
-  /** Fraction of the viewport the element must reach before playing, 0-1. */
   threshold?: number;
   delay?: number;
-  /** Play on mount instead of waiting for scroll. */
-  alwaysPlay?: boolean;
-  blur?: number;
+  className?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  distance: 60,
+const props = withDefaults(defineProps<AnimatedContentProps>(), {
+  distance: 100,
   direction: "vertical",
   reverse: false,
-  duration: 1,
+  duration: 0.8,
   ease: "power3.out",
   initialOpacity: 0,
   animateOpacity: true,
   scale: 1,
-  threshold: 0.12,
+  threshold: 0.1,
   delay: 0,
-  alwaysPlay: false,
-  blur: 0,
+  className: "",
 });
 
-const root = useTemplateRef<HTMLDivElement>("root");
+const emit = defineEmits<{
+  complete: [];
+}>();
 
-useGSAP(
-  ({ reduced }) => {
-    const el = root.value;
+const containerRef = useTemplateRef<HTMLDivElement>("containerRef");
+
+onMounted(() => {
+  const el = containerRef.value;
+  if (!el) return;
+
+  const axis = props.direction === "horizontal" ? "x" : "y";
+  const offset = props.reverse ? -props.distance : props.distance;
+  const startPct = (1 - props.threshold) * 100;
+
+  gsap.set(el, {
+    [axis]: offset,
+    scale: props.scale,
+    opacity: props.animateOpacity ? props.initialOpacity : 1,
+  });
+
+  gsap.to(el, {
+    [axis]: 0,
+    scale: 1,
+    opacity: 1,
+    duration: props.duration,
+    ease: props.ease,
+    delay: props.delay,
+    onComplete: () => emit("complete"),
+    scrollTrigger: {
+      trigger: el,
+      start: `top ${startPct}%`,
+      toggleActions: "play none none none",
+      once: true,
+    },
+  });
+});
+
+watch(
+  () => [
+    props.distance,
+    props.direction,
+    props.reverse,
+    props.duration,
+    props.ease,
+    props.initialOpacity,
+    props.animateOpacity,
+    props.scale,
+    props.threshold,
+    props.delay,
+  ],
+  () => {
+    const el = containerRef.value;
     if (!el) return;
 
-    // Under reduced motion, jump straight to the resting state so content is
-    // never left invisible.
-    if (reduced) {
-      gsap.set(el, { clearProps: "all", opacity: 1 });
-      return;
-    }
+    ScrollTrigger.getAll().forEach((t) => t.kill());
+    gsap.killTweensOf(el);
 
     const axis = props.direction === "horizontal" ? "x" : "y";
     const offset = props.reverse ? -props.distance : props.distance;
+    const startPct = (1 - props.threshold) * 100;
 
     gsap.set(el, {
       [axis]: offset,
       scale: props.scale,
       opacity: props.animateOpacity ? props.initialOpacity : 1,
-      filter: props.blur ? `blur(${props.blur}px)` : "none",
     });
 
     gsap.to(el, {
       [axis]: 0,
       scale: 1,
       opacity: 1,
-      filter: "blur(0px)",
       duration: props.duration,
       ease: props.ease,
       delay: props.delay,
-      // Clear inline transforms afterwards so hover effects on children are
-      // not fighting a leftover matrix.
-      clearProps: "filter",
-      ...(props.alwaysPlay
-        ? {}
-        : {
-            scrollTrigger: {
-              trigger: el,
-              start: `top ${(1 - props.threshold) * 100}%`,
-              toggleActions: "play none none none",
-              once: true,
-            },
-          }),
+      onComplete: () => emit("complete"),
+      scrollTrigger: {
+        trigger: el,
+        start: `top ${startPct}%`,
+        toggleActions: "play none none none",
+        once: true,
+      },
     });
   },
-  { scope: root },
+  { deep: true },
 );
+
+onUnmounted(() => {
+  const el = containerRef.value;
+  if (el) {
+    ScrollTrigger.getAll().forEach((t) => t.kill());
+    gsap.killTweensOf(el);
+  }
+});
 </script>
 
 <template>
-  <div ref="root" class="will-change-transform">
+  <div ref="containerRef" :class="`animated-content ${props.className}`">
     <slot />
   </div>
 </template>
+
+<style scoped>
+/* GSAP will handle all transforms and opacity */
+</style>

@@ -6,16 +6,34 @@
  * long marquee sections are never cropped by it. Threshold is deliberately
  * above the hero fold: hiding it inside the first viewport reads as a glitch.
  */
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 import { useRoute } from "vue-router";
+import { gsap, useGSAP } from "@/composables/useGSAP";
 import { navItems, site } from "@/data/profile";
 
 const open = ref(false);
 const hidden = ref(false);
 const scrolled = ref(false);
 const route = useRoute();
+const props = defineProps<{ ready: boolean }>();
+const root = useTemplateRef<HTMLElement>("root");
 
 let lastY = 0;
+
+useGSAP(
+  () => {
+    gsap.set(root.value, { autoAlpha: props.ready ? 1 : 0 });
+    if (!props.ready) {
+      watch(
+        () => props.ready,
+        (ready) => {
+          if (ready) gsap.to(root.value, { autoAlpha: 1, duration: 0.4, ease: "power2.out" });
+        },
+      );
+    }
+  },
+  { scope: root },
+);
 
 function isExternal(href: string) {
   return /^https?:\/\//.test(href);
@@ -59,6 +77,7 @@ onUnmounted(() => {
 <template>
   <!-- Desktop / tablet bar -->
   <header
+    ref="root"
     class="fixed inset-x-0 top-0 z-1000 transition-all duration-500 ease-hex"
     :class="[
       hidden ? '-translate-y-full' : 'translate-y-0',
@@ -67,15 +86,15 @@ onUnmounted(() => {
         : 'border-b border-transparent',
     ]"
   >
-    <nav class="container-page flex items-center justify-between py-3.5">
+    <nav class="w-full px-5 sm:px-6 lg:px-8 flex items-center justify-between py-2.5">
       <RouterLink to="/" class="cursor-target group flex items-center gap-2.5">
         <img
-          src="/hexagon-icon-white.svg"
+          src="/hexagon-white.svg"
           alt=""
-          class="h-6 w-6 transition-transform duration-500 ease-hex group-hover:rotate-90"
+          class="h-8 w-8 transition-transform duration-500 ease-hex group-hover:rotate-90"
         />
         <span
-          class="font-display text-base font-medium uppercase tracking-[0.2em] text-silver-50 transition-all duration-300 group-hover:glow-12"
+          class="font-display text-2xl font-medium uppercase tracking-[0.2em] text-silver-50 transition-all duration-300 group-hover:glow-12"
           translate="no"
         >
           {{ site.short }}
@@ -89,7 +108,7 @@ onUnmounted(() => {
             :href="item.href"
             target="_blank"
             rel="noopener noreferrer"
-            class="cursor-target link-glow inline-flex items-center gap-1.5 px-4 py-2 font-display text-sm uppercase tracking-[0.14em] text-silver-200"
+            class="cursor-target link-glow inline-flex items-center gap-1.5 px-4 py-2 font-display text-md uppercase tracking-[0.14em] text-silver-200 hover:glow-12"
           >
             {{ item.text }}
             <span class="i-lucide-external-link text-xs opacity-60" aria-hidden="true" />
@@ -97,16 +116,10 @@ onUnmounted(() => {
           <RouterLink
             v-else
             :to="item.href"
-            class="cursor-target link-glow relative inline-block px-4 py-2 font-display text-sm uppercase tracking-[0.14em] text-silver-200"
-            active-class="text-violet-300"
+            class="cursor-target link-glow relative inline-block px-4 py-2 font-display text-md uppercase tracking-[0.14em] text-silver-200 hover:glow-22"
+            active-class="text-violet-400"
           >
             {{ item.text }}
-            <!-- Hexagon marker instead of the usual underline. -->
-            <span
-              v-if="route.path === item.href"
-              class="absolute -bottom-0.5 left-1/2 h-1.5 w-1.5 -translate-x-1/2 hex-point bg-magenta-400"
-              aria-hidden="true"
-            />
           </RouterLink>
         </li>
       </ul>
@@ -134,7 +147,7 @@ onUnmounted(() => {
     <div
       v-if="open"
       id="mobile-nav"
-      class="fixed inset-0 z-999 flex flex-col bg-void-900/98 backdrop-blur-xl md:hidden"
+      class="fixed inset-0 z-999 flex flex-col bg-void-900/50 backdrop-blur-xl md:hidden"
     >
       <ul class="flex flex-1 flex-col justify-center gap-2 px-8">
         <li v-for="(item, i) in navItems" :key="item.href">

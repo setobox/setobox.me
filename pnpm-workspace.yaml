@@ -1,24 +1,33 @@
-catalog:
-  vite: npm:@voidzero-dev/vite-plus-core@0.2.8
-  vite-plus: 0.2.8
+autoInstallPeers: false
+shamefullyHoist: true
+shellEmulator: true
+strictPeerDependencies: false
+trustPolicy: no-downgrade
+
 catalogs:
+  build:
+    "@cloudflare/vite-plugin": ^1.53.1
+    "@tsconfig/node24": ^24.0.5
+    "@vue/tsconfig": ^0.9.1
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.2.8"
+    vite-plus: 0.2.8
+    wrangler: ^4.125.0
   dev:
     "@iconify-json/lucide": ^1.2.125
     "@iconify-json/simple-icons": ^1.2.93
     "@types/node": ^26.2.0
     "@unocss/reset": ^66.8.1
     "@vitejs/plugin-vue": ^6.0.8
+    "@vueuse/core": ^14.4.0
     unocss: ^66.8.1
     vue-tsc: ^3.3.11
   frontend:
     gsap: ^3.15.0
     lenis: ^1.3.26
+    motion-v: ^2.4.0
     vue: ^3.5.41
     vue-router: ^5.2.0
-overrides:
-  vite: "catalog:"
-peerDependencyRules:
-  allowAny:
-    - vite
-  allowedVersions:
-    vite: "*"
+
+allowBuilds:
+  esbuild: true
+  workerd: true

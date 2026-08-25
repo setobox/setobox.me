@@ -10,7 +10,7 @@
  * two rules visibly different lengths.
  */
 import AnimatedContent from "@/components/bits/AnimatedContent.vue";
-import ScrambleText from "@/components/bits/ScrambleText.vue";
+import DecryptedText from "@/components/bits/DecryptedText.vue";
 
 interface Props {
   title: string;
@@ -41,22 +41,27 @@ const props = withDefaults(defineProps<Props>(), {
         />
 
         <div class="flex min-w-0 items-center gap-3 sm:gap-4">
-          <span
+          <!-- <span
             class="i-lucide-hexagon hidden shrink-0 text-sm text-magenta-400 sm:block"
             aria-hidden="true"
-          />
+          /> -->
           <h2 class="h-section flex items-center gap-3">
-            <ScrambleText :text="props.title" :churn="6" />
+            <DecryptedText
+              :text="props.title"
+              :max-iterations="10"
+              animate-on="view"
+              class="text-glow"
+            />
             <span
               :class="props.icon"
               class="shrink-0 text-[0.7em] text-violet-400"
               aria-hidden="true"
             />
           </h2>
-          <span
+          <!-- <span
             class="i-lucide-hexagon hidden shrink-0 text-sm text-cyan-400 sm:block"
             aria-hidden="true"
-          />
+          /> -->
         </div>
 
         <span
