@@ -179,7 +179,7 @@ function next() {
       aria-label="Scroll to next section"
       @click="next"
     >
-      <span class="i-lucide-chevron-down animate-flicker text-6xl" aria-hidden="true" />
+      <span class="i-lucide-chevron-down animate-hex-pulse text-6xl" aria-hidden="true" />
     </button>
   </section>
 </template>
