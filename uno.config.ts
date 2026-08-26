@@ -1,7 +1,9 @@
+import { createLocalFontProcessor } from "@unocss/preset-web-fonts/local";
 import {
   defineConfig,
   presetAttributify,
   presetIcons,
+  presetWebFonts,
   presetWind4,
   transformerDirectives,
   transformerVariantGroup,
@@ -17,6 +19,34 @@ import {
 export default defineConfig({
   presets: [
     presetWind4({ preflights: { reset: true } }),
+    presetWebFonts({
+      provider: "google",
+      // Keep the existing font token stacks below, including their system
+      // fallbacks. This preset only emits the local @font-face declarations.
+      extendTheme: false,
+      fonts: {
+        display: {
+          name: "Orbitron",
+          weights: ["400..900"],
+          subsets: ["latin"],
+        },
+        sans: {
+          name: "Chakra Petch",
+          weights: ["400"],
+          subsets: ["latin"],
+        },
+        mono: {
+          name: "JetBrains Mono",
+          weights: ["400"],
+          subsets: ["latin"],
+        },
+      },
+      processors: createLocalFontProcessor({
+        cacheDir: "node_modules/.cache/unocss/fonts",
+        fontAssetsDir: "public/assets/fonts",
+        fontServeBaseUrl: "/assets/fonts",
+      }),
+    }),
     presetAttributify(),
     presetIcons({
       scale: 1.2,

@@ -23,6 +23,7 @@
     "@iconify-json/simple-icons": "catalog:dev",
     "@tsconfig/node24": "catalog:build",
     "@types/node": "catalog:dev",
+    "@unocss/preset-web-fonts": "catalog:dev",
     "@vitejs/plugin-vue": "catalog:dev",
     "@vue/tsconfig": "catalog:build",
     "@vueuse/core": "catalog:dev",

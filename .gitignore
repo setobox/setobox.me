@@ -38,6 +38,9 @@ __screenshots__/
 # Vite
 *.timestamp-*-*.mjs
 
+# Generated at build time by UnoCSS presetWebFonts' local processor.
+/public/assets/fonts/
+
 # wrangler files
 .wrangler
 .dev.vars*

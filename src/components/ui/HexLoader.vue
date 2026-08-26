@@ -11,9 +11,9 @@
  * never wider or taller than the viewBox itself - filling 1000x1000 covers any
  * viewport at any size with ~90 cells, and no resize bookkeeping.
  *
- * Waits on `document.fonts.ready` as well as `window.load`: Orbitron arriving
- * late would otherwise reflow the hero headline right after the reveal, which
- * is the most visible moment on the page.
+ * The page opens after the lattice has assembled; it deliberately does not
+ * wait for web fonts or the window load event. Both can be delayed by the
+ * network and would make a cosmetic loading screen hold back first content.
  */
 import { onMounted, ref, useTemplateRef } from "vue";
 import { gsap, prefersReducedMotion } from "@/composables/useGSAP";
@@ -64,18 +64,9 @@ function finish() {
   emit("done");
 }
 
-/** Everything that must land before the plate is allowed to open. */
-function settled(): Promise<unknown> {
-  return Promise.all([
-    document.fonts?.ready.catch(() => undefined) ?? Promise.resolve(),
-    document.readyState === "complete"
-      ? Promise.resolve()
-      : new Promise<void>((resolve) =>
-          window.addEventListener("load", () => resolve(), { once: true }),
-        ),
-    // Floor, so the assemble animation is never cut off mid-stagger.
-    new Promise<void>((resolve) => setTimeout(resolve, 1300)),
-  ]);
+/** Floor, so the assemble animation is never cut off mid-stagger. */
+function settled(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 1300));
 }
 
 onMounted(async () => {
