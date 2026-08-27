@@ -35,12 +35,14 @@ useGSAP(
       start: "top 88%",
     });
 
-    scrollReveal(".intro-line", {
-      trigger: ".intro-block",
-      y: 22,
-      duration: 0.8,
-      start: "top 90%",
-    });
+    if (props.intro) {
+      scrollReveal(".intro-line", {
+        trigger: ".intro-block",
+        y: 22,
+        duration: 0.8,
+        start: "top 90%",
+      });
+    }
   },
   { scope: root },
 );
