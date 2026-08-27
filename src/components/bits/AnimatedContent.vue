@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch, useTemplateRef } from "vue";
+import { onBeforeUnmount, onMounted, watch, useTemplateRef } from "vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -38,10 +38,21 @@ const emit = defineEmits<{
 }>();
 
 const containerRef = useTemplateRef<HTMLDivElement>("containerRef");
+let tween: gsap.core.Tween | null = null;
 
-onMounted(() => {
+function cleanupAnimation() {
+  tween?.scrollTrigger?.kill();
+  tween?.kill();
+  tween = null;
+
+  if (containerRef.value) gsap.killTweensOf(containerRef.value);
+}
+
+function createAnimation() {
   const el = containerRef.value;
   if (!el) return;
+
+  cleanupAnimation();
 
   const axis = props.direction === "horizontal" ? "x" : "y";
   const offset = props.reverse ? -props.distance : props.distance;
@@ -53,7 +64,7 @@ onMounted(() => {
     opacity: props.animateOpacity ? props.initialOpacity : 1,
   });
 
-  gsap.to(el, {
+  tween = gsap.to(el, {
     [axis]: 0,
     scale: 1,
     opacity: 1,
@@ -68,6 +79,10 @@ onMounted(() => {
       once: true,
     },
   });
+}
+
+onMounted(() => {
+  createAnimation();
 });
 
 watch(
@@ -83,48 +98,11 @@ watch(
     props.threshold,
     props.delay,
   ],
-  () => {
-    const el = containerRef.value;
-    if (!el) return;
-
-    ScrollTrigger.getAll().forEach((t) => t.kill());
-    gsap.killTweensOf(el);
-
-    const axis = props.direction === "horizontal" ? "x" : "y";
-    const offset = props.reverse ? -props.distance : props.distance;
-    const startPct = (1 - props.threshold) * 100;
-
-    gsap.set(el, {
-      [axis]: offset,
-      scale: props.scale,
-      opacity: props.animateOpacity ? props.initialOpacity : 1,
-    });
-
-    gsap.to(el, {
-      [axis]: 0,
-      scale: 1,
-      opacity: 1,
-      duration: props.duration,
-      ease: props.ease,
-      delay: props.delay,
-      onComplete: () => emit("complete"),
-      scrollTrigger: {
-        trigger: el,
-        start: `top ${startPct}%`,
-        toggleActions: "play none none none",
-        once: true,
-      },
-    });
-  },
-  { deep: true },
+  createAnimation,
 );
 
-onUnmounted(() => {
-  const el = containerRef.value;
-  if (el) {
-    ScrollTrigger.getAll().forEach((t) => t.kill());
-    gsap.killTweensOf(el);
-  }
+onBeforeUnmount(() => {
+  cleanupAnimation();
 });
 </script>
 
