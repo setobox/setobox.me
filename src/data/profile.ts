@@ -70,19 +70,26 @@ export interface Tech {
 }
 
 export const stack: Tech[] = [
-  { name: "Vue.js", key: true },
-  { name: "TypeScript", key: true },
-  { name: "JavaScript" },
-  { name: "Python", key: true },
   { name: "HTML", key: true },
   { name: "CSS", key: true },
+  { name: "TypeScript", key: true },
+  { name: "Vue", key: true },
+  { name: "Nuxt", key: true },
   { name: "React" },
+  { name: "Next.js" },
   { name: "Vite", key: true },
   { name: "Tailwind", key: true },
   { name: "UnoCSS", key: true },
-  { name: "GSAP" },
+  { name: "Electron" },
+  { name: "GSAP", key: true },
+  { name: "Blender", key: true },
+  { name: "Python" },
+  { name: "Three.js" },
   { name: "Node" },
   { name: "Git" },
+  { name: "Docker" },
+  { name: "Linux" },
+  { name: "Figma" },
 ];
 
 export const socials: Social[] = [
