@@ -5,12 +5,60 @@
     <link rel="icon" type="image/svg+xml" href="/img/avatar.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#060413" />
-    <meta name="description" content="Setobox Home — 姬顶盒的个人主页。" />
-    <meta property="og:title" content="Setobox Home" />
-    <meta property="og:description" content="DEVELOPMENT WITH LOVE." />
+    <meta name="author" content="Setobox" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph - 静态配置 -->
+    <meta property="og:site_name" content="Setobox Home" />
     <meta property="og:type" content="website" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- SEO -->
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
     <title>Setobox Home</title>
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Setobox",
+        "alternateName": "姬顶盒",
+        "url": "https://setobox.me",
+        "image": "https://setobox.me/img/avatar.jpg",
+        "sameAs": [
+          "https://github.com/setobox",
+          "https://space.bilibili.com/8638330",
+          "https://blog.setobox.me"
+        ],
+        "jobTitle": "Frontend Developer",
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Independent"
+        },
+        "knowsAbout": [
+          "Vue",
+          "TypeScript",
+          "GSAP",
+          "Frontend Development",
+          "Web Animation",
+          "UnoCSS",
+          "Vite"
+        ],
+        "birthDate": "2000-06-12",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Shanghai",
+          "addressCountry": "CN"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>

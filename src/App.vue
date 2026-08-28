@@ -14,10 +14,14 @@ import SiteNav from "@/components/ui/SiteNav.vue";
 import TargetCursor from "@/components/bits/TargetCursor.vue";
 import { refreshScrollTriggers } from "@/composables/useGSAP";
 import { useSmoothScroll } from "@/composables/useSmoothScroll";
+import { useSEO } from "@/composables/useSEO";
 
 const booted = ref(false);
 const navReady = ref(false);
 const { start } = useSmoothScroll();
+
+// Dynamic SEO meta tags
+useSEO();
 
 function onLoaderDone() {
   // Reveal changed layout heights; recompute every trigger once it settles.

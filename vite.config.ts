@@ -3,9 +3,20 @@ import vue from "@vitejs/plugin-vue";
 import UnoCSS from "unocss/vite";
 import { defineConfig } from "vite-plus";
 import { cloudflare } from "@cloudflare/vite-plugin";
+import sitemap from "vite-plugin-sitemap";
 
 export default defineConfig({
-  plugins: [vue(), UnoCSS(), cloudflare()],
+  plugins: [
+    vue(),
+    UnoCSS(),
+    cloudflare(),
+    sitemap({
+      hostname: "https://setobox.me",
+      dynamicRoutes: ["/", "/about"],
+      changefreq: "monthly",
+      priority: 1.0,
+    }),
+  ],
 
   resolve: {
     alias: {

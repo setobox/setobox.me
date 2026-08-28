@@ -10,6 +10,7 @@
     "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
+    "@unhead/vue": "catalog:build",
     "gsap": "catalog:frontend",
     "lenis": "catalog:frontend",
     "motion-v": "catalog:frontend",
@@ -31,6 +32,7 @@
     "typescript": "~6.0.2",
     "unocss": "catalog:dev",
     "vite": "catalog:build",
+    "vite-plugin-sitemap": "catalog:build",
     "vite-plus": "catalog:build",
     "vue-tsc": "catalog:dev",
     "wrangler": "catalog:build"
