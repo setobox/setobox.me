@@ -14,8 +14,8 @@ const routes: RouteRecordRaw[] = [
     name: "home",
     component: () => import("@/pages/HomePage.vue"),
     meta: {
-      title: site.name,
-      description: "专注于前端开发、交互设计和动效实现。",
+      title: "首页 - Setobox(姬顶盒)",
+      description: "Setobox 的箱庭世界。",
       keywords:
         "setobox, 姬顶盒, frontend developer, vue, typescript, gsap, web developer, 前端开发",
     } satisfies RouteMeta,
@@ -25,8 +25,8 @@ const routes: RouteRecordRaw[] = [
     name: "about",
     component: () => import("@/pages/AboutPage.vue"),
     meta: {
-      title: `About - ${site.name}`,
-      description: "了解 Setobox：前端开发者、ACG 爱好者、技术探索者。喜欢创造、音乐和运动。",
+      title: "关于 - Setobox(姬顶盒)",
+      description: "了解 Setobox。",
       keywords: "about setobox, developer profile, tech stack, frontend developer shanghai",
     } satisfies RouteMeta,
   },
