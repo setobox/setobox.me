@@ -1,18 +1,24 @@
 <script setup lang="ts">
 /**
- * StackSection - roles as a honeycomb, then the tech list as a hexagon field.
+ * StackSection - roles as a honeycomb, then the tech list as a physics word
+ * cloud.
  *
  * The honeycomb is a flex wrap with negative row margin and alternate-row
  * offset rather than a grid: a real interlocking honeycomb has half-column
  * offsets that CSS grid cannot express without one column per half-step.
  */
-import { useTemplateRef } from "vue";
+import { computed, useTemplateRef } from "vue";
+import FallingText from "@/components/bits/FallingText.vue";
 import HexTile from "@/components/ui/HexTile.vue";
 import SectionHeading from "@/components/ui/SectionHeading.vue";
 import { scrollReveal, useGSAP } from "@/composables/useGSAP";
 import { roles, stack } from "@/data/profile";
 
 const root = useTemplateRef<HTMLElement>("root");
+
+/** Falling words: the tech list as a physics word cloud. */
+const stackText = computed(() => stack.map((t) => t.name).join(" "));
+const highlightedStack = computed(() => stack.filter((t) => t.key).map((t) => t.name));
 
 useGSAP(
   ({ reduced }) => {
@@ -26,17 +32,6 @@ useGSAP(
       ease: "back.out(1.7)",
       stagger: { each: 0.08, from: "center" },
       start: "top 86%",
-    });
-
-    // Ripple outward from the centre of the field, the way the anime.js dot
-    // matrix does - it makes a flat list of names feel like a system booting.
-    scrollReveal(".stack-tile", {
-      trigger: ".stack-field",
-      scale: 0.2,
-      duration: 0.6,
-      ease: "back.out(1.5)",
-      stagger: { each: 0.028, from: "center", grid: "auto" },
-      start: "top 88%",
     });
   },
   { scope: root },
@@ -60,15 +55,19 @@ useGSAP(
         </div>
       </div>
 
-      <!-- Tech field -->
-      <div class="stack-field mt-20 flex flex-wrap justify-center gap-x-1.5 gap-y-1 sm:mt-24">
+      <!-- Tech word cloud: physics-driven falling words. -->
+      <div class="stack-field mt-20 sm:mt-24">
         <div
-          v-for="(tech, i) in stack"
-          :key="tech.name"
-          class="stack-tile"
-          :class="i % 2 === 1 ? 'mt-11' : ''"
+          class="cut-14 mx-auto h-[320px] w-full max-w-4xl border border-silver-700/70 bg-void-800/50 backdrop-blur-sm sm:h-[420px]"
         >
-          <HexTile :label="tech.name" :accent="tech.key" :size="88" />
+          <FallingText
+            :text="stackText"
+            :highlight-words="highlightedStack"
+            trigger="scroll"
+            :gravity="0.4"
+            font-size="1.8rem"
+            :mouse-constraint-stiffness="1"
+          />
         </div>
       </div>
     </div>
