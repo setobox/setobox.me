@@ -6,6 +6,7 @@
 import AnimatedContent from "@/components/bits/AnimatedContent.vue";
 import ElectricBorder from "@/components/bits/ElectricBorder.vue";
 import FadeContent from "@/components/bits/FadeContent.vue";
+import LogoLoop from "@/components/bits/LogoLoop.vue";
 import HexTile from "@/components/ui/HexTile.vue";
 import SectionHeading from "@/components/ui/SectionHeading.vue";
 import TextType from "@/components/bits/TextType.vue";
@@ -16,6 +17,13 @@ const detailRows = [
   { label: "A.K.A.", value: profile.aka.join(" / "), icon: "i-lucide-layers" },
   { label: "EMAIL", value: profile.email, icon: "i-lucide-mail" },
 ];
+
+/** Icons fed into the logo marquee; each links out to the matching profile. */
+const socialLogos = socials.map((s) => ({
+  node: `<i class="${s.icon}"></i>`,
+  title: s.name,
+  href: s.href,
+}));
 </script>
 
 <template>
@@ -124,30 +132,18 @@ const detailRows = [
       <!-- All links -->
       <div class="mt-24 pb-8">
         <SectionHeading title="ELSEWHERE" kicker="find me around" icon="i-lucide-globe" />
-        <div class="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <a
-            v-for="s in socials"
-            :key="s.name"
-            :href="s.href"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="cursor-target hovertrans group flex items-center gap-3 cut-12 border border-silver-700/80 bg-void-800/60 px-5 py-4 backdrop-blur-sm transition-all duration-400 ease-hex hover:border-violet-400/70 hover:bg-void-700/70"
-          >
-            <span
-              :class="s.icon"
-              class="text-lg text-silver-300 transition-colors duration-400 group-hover:text-violet-300"
-              aria-hidden="true"
-            />
-            <span
-              class="font-display text-sm uppercase tracking-[0.14em] text-silver-200 group-hover:text-white"
-            >
-              {{ s.name }}
-            </span>
-            <span
-              class="i-lucide-arrow-up-right ml-auto text-sm text-silver-600 transition-all duration-400 ease-hex group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-violet-300"
-              aria-hidden="true"
-            />
-          </a>
+        <div class="mt-12">
+          <LogoLoop
+            :logos="socialLogos"
+            :speed="80"
+            :logo-height="48"
+            :gap="48"
+            :pause-on-hover="true"
+            :fade-out="true"
+            fade-out-color="#060413"
+            :scale-on-hover="true"
+            aria-label="Find me around"
+          />
         </div>
       </div>
     </div>
