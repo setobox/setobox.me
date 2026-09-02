@@ -106,7 +106,7 @@ function next() {
 
     <div class="hero-inner relative z-2 flex w-full max-w-6xl flex-col items-center">
       <h1
-        class="text-center font-display font-light uppercase leading-[1.04] tracking-[0.01em] text-silver-50 text-[clamp(1.85rem,7.8vw,5.4rem)]"
+        class="w-full text-center font-display font-light uppercase leading-[1.04] tracking-[0.01em] text-silver-50 text-[clamp(1.32rem,7.5vw,5.4rem)]"
         translate="no"
       >
         <AnimatedContent
