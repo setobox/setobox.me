@@ -7,8 +7,9 @@
  * > SpotlightCard (highlight) > the panel. Each does one thing, so any of them
  * can be dropped without touching the others.
  */
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import AnimatedContent from "@/components/bits/AnimatedContent.vue";
+import LoadingImg from "@/components/bits/LoadingImg.vue";
 import Magnet from "@/components/bits/Magnet.vue";
 import SpotlightCard from "@/components/bits/SpotlightCard.vue";
 import type { Project } from "@/data/projects";
@@ -21,8 +22,6 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), { flip: false });
 
-const coverFailed = ref(false);
-
 /**
  * Deterministic hue from the title, so the procedural fallback cover is stable
  * across reloads instead of flickering to a new colour each mount.
@@ -33,8 +32,6 @@ const hue = computed(() => {
   // Bias into the violet/magenta/cyan arc of the palette.
   return 200 + (h % 130);
 });
-
-const showCover = computed(() => Boolean(props.project.cover) && !coverFailed.value);
 </script>
 
 <template>
@@ -55,36 +52,29 @@ const showCover = computed(() => Boolean(props.project.cover) && !coverFailed.va
         >
           <!-- Cover -->
           <div
-            class="relative aspect-16/10 w-full shrink-0 overflow-hidden md:aspect-auto md:min-h-[240px] md:w-[min(32vw,310px)]"
+            class="relative aspect-16/10 w-full shrink-0 overflow-hidden md:aspect-auto md:min-h-[260px] md:w-[min(36vw,440px)]"
           >
-            <!-- Absolute so the cover fills whatever height the copy column
-                   dictates on desktop, instead of forcing a square that leaves
-                   a tall band of dead space beside short descriptions. -->
-            <img
-              v-if="showCover"
+            <LoadingImg
               :src="project.cover"
               :alt="`${project.title} cover`"
-              loading="lazy"
-              decoding="async"
-              class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-hex group-hover:scale-105"
-              @error="coverFailed = true"
-            />
-            <!-- Procedural fallback: a hexagon field in the project's own hue. -->
-            <div
-              v-else
-              class="absolute inset-0 h-full w-full transition-transform duration-700 ease-hex group-hover:scale-105"
-              :style="{
-                background: `radial-gradient(120% 120% at 25% 15%, hsl(${hue} 80% 42% / 55%), transparent 60%), radial-gradient(100% 100% at 85% 90%, hsl(${hue + 60} 85% 50% / 40%), transparent 55%), #0A0722`,
-              }"
+              img-class="transition-transform duration-700 ease-hex group-hover:scale-105"
             >
-              <div class="grid h-full w-full place-items-center">
-                <span
-                  class="i-lucide-hexagon text-6xl opacity-25"
-                  :style="{ color: `hsl(${hue} 90% 75%)` }"
-                  aria-hidden="true"
-                />
+              <!-- Procedural fallback: a hexagon field in the project's own hue. -->
+              <div
+                class="absolute inset-0 h-full w-full transition-transform duration-700 ease-hex group-hover:scale-105"
+                :style="{
+                  background: `radial-gradient(120% 120% at 25% 15%, hsl(${hue} 80% 42% / 55%), transparent 60%), radial-gradient(100% 100% at 85% 90%, hsl(${hue + 60} 85% 50% / 40%), transparent 55%), #0A0722`,
+                }"
+              >
+                <div class="grid h-full w-full place-items-center">
+                  <span
+                    class="i-lucide-hexagon text-6xl opacity-25"
+                    :style="{ color: `hsl(${hue} 90% 75%)` }"
+                    aria-hidden="true"
+                  />
+                </div>
               </div>
-            </div>
+            </LoadingImg>
             <!-- Colour wash that clears on hover. -->
             <div
               class="pointer-events-none absolute inset-0 bg-void-900/55 transition-opacity duration-700 ease-hex group-hover:opacity-0"
@@ -99,7 +89,7 @@ const showCover = computed(() => Boolean(props.project.cover) && !coverFailed.va
             <a :href="project.href" target="_blank" rel="noopener noreferrer" class="block">
               <div class="flex gap-4 w-fit cursor-target">
                 <span
-                  class="font-display text-2xl font-light uppercase tracking-[0.06em] text-silver-50 transition-all duration-300 group-hover:glow-14 hovertrans md:text-3xl"
+                  class="font-display text-3xl font-light uppercase tracking-[0.06em] text-silver-50 transition-all duration-300 group-hover:glow-14 hovertrans md:text-4xl"
                 >
                   {{ project.title }}
                 </span>
