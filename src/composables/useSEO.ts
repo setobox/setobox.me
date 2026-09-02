@@ -1,6 +1,5 @@
 import { useHead } from "@unhead/vue";
 import { useRoute } from "vue-router";
-import { watchEffect } from "vue";
 
 interface RouteMeta {
   title?: string;
@@ -19,7 +18,10 @@ export function useSEO() {
   const route = useRoute();
   const baseUrl = "https://setobox.me";
 
-  watchEffect(() => {
+  // Register the head entry while setup's injection context is active. Unhead
+  // tracks the route values read by this getter and updates the entry whenever
+  // navigation changes.
+  useHead(() => {
     const meta = route.meta as RouteMeta;
     const url = `${baseUrl}${route.path}`;
     const title = meta.title || "Setobox Home";
@@ -28,7 +30,7 @@ export function useSEO() {
     const keywords = meta.keywords || "setobox, frontend developer, vue, typescript, gsap";
     const ogImage = meta.ogImage || `${baseUrl}/img/og-image.jpg`;
 
-    useHead({
+    return {
       title,
       meta: [
         { name: "description", content: description },
@@ -42,6 +44,6 @@ export function useSEO() {
         { name: "twitter:image", content: ogImage },
       ],
       link: [{ rel: "canonical", href: url }],
-    });
+    };
   });
 }
