@@ -30,6 +30,11 @@ export default defineConfig({
           weights: ["400..900"],
           subsets: ["latin"],
         },
+        display2: {
+          name: "Electrolize",
+          weights: ["400"],
+          subsets: ["latin"],
+        },
         sans: {
           name: "Chakra Petch",
           weights: ["400"],
@@ -125,6 +130,7 @@ export default defineConfig({
 
     font: {
       display: '"Orbitron", "Chakra Petch", ui-sans-serif, system-ui, sans-serif',
+      display2: '"Electrolize", "Orbitron", ui-sans-serif, system-ui, sans-serif',
       sans: '"Chakra Petch", ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei", sans-serif',
       mono: '"JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace',
     },
