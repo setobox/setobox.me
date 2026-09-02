@@ -24,6 +24,18 @@ export const site = {
   tagline: "while(!dead) { time--; exp++; }",
 } as const;
 
+/**
+ * giscus 留言板配置（来自 https://giscus.app）。
+ * 需要一个公开仓库 + 开启 Discussions + 安装 giscus GitHub App。
+ * 任一字段留空则整个留言板不渲染。
+ */
+export const giscus = {
+  repo: "", // e.g. "setobox/setobox-home"
+  repoId: "", // e.g. "R_kgDO..."
+  category: "", // e.g. "Announcements"
+  categoryId: "", // e.g. "DIC_kwDO..."
+};
+
 export const profile = {
   handle: "setobox",
   aka: ["姬顶盒"],

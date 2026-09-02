@@ -7,6 +7,7 @@ import AnimatedContent from "@/components/bits/AnimatedContent.vue";
 import ElectricBorder from "@/components/bits/ElectricBorder.vue";
 import FadeContent from "@/components/bits/FadeContent.vue";
 import LogoLoop from "@/components/bits/LogoLoop.vue";
+import CommentSection from "@/components/ui/CommentSection.vue";
 import HexTile from "@/components/ui/HexTile.vue";
 import SectionHeading from "@/components/ui/SectionHeading.vue";
 import TextType from "@/components/bits/TextType.vue";
@@ -144,6 +145,14 @@ const socialLogos = socials.map((s) => ({
             :scale-on-hover="true"
             aria-label="Find me around"
           />
+        </div>
+      </div>
+
+      <!-- Comments (giscus) -->
+      <div class="mt-24 pb-8">
+        <SectionHeading title="MESSAGES" kicker="leave a message" icon="i-lucide-message-circle" />
+        <div class="mt-12">
+          <CommentSection />
         </div>
       </div>
     </div>

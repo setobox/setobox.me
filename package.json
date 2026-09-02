@@ -10,6 +10,7 @@
     "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
+    "@giscus/vue": "catalog:frontend",
     "@unhead/vue": "catalog:build",
     "gsap": "catalog:frontend",
     "lenis": "catalog:frontend",
