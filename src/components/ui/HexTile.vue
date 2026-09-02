@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
   <div
-    class="group relative cursor-target"
+    class="group relative cursor-target hovertrans"
     :style="{ width: `${props.size}px`, height: `${props.size * 1.1547}px` }"
   >
     <!-- Outline layer. -->

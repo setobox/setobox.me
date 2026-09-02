@@ -76,7 +76,7 @@ useGSAP(
             :href="s.href"
             target="_blank"
             rel="noopener noreferrer"
-            class="contact-link cursor-target group flex items-center gap-3 cut-12 border border-silver-700/80 bg-void-800/60 px-5 py-4 backdrop-blur-sm transition-all duration-400 ease-hex hover:border-purple-400/70 hover:bg-void-700/70"
+            class="contact-link cursor-target hovertrans group flex items-center gap-3 cut-12 border border-silver-700/80 bg-void-800/60 px-5 py-4 backdrop-blur-sm transition-all duration-400 ease-hex hover:border-purple-400/70 hover:bg-void-700/70"
           >
             <span
               :class="s.icon"

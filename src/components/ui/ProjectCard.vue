@@ -99,7 +99,7 @@ const showCover = computed(() => Boolean(props.project.cover) && !coverFailed.va
             <a :href="project.href" target="_blank" rel="noopener noreferrer" class="block">
               <div class="flex gap-4 w-fit cursor-target">
                 <span
-                  class="font-display text-2xl font-light uppercase tracking-[0.06em] text-silver-50 transition-all duration-300 group-hover:glow-14 md:text-3xl"
+                  class="font-display text-2xl font-light uppercase tracking-[0.06em] text-silver-50 transition-all duration-300 group-hover:glow-14 hovertrans md:text-3xl"
                 >
                   {{ project.title }}
                 </span>

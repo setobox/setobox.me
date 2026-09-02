@@ -108,7 +108,7 @@ onUnmounted(() => {
             :href="item.href"
             target="_blank"
             rel="noopener noreferrer"
-            class="cursor-target link-glow inline-flex items-center gap-1.5 px-4 py-2 font-display text-md uppercase tracking-[0.14em] text-silver-200 hover:glow-12"
+            class="cursor-target link-glow hovertrans inline-flex items-center gap-1.5 px-4 py-2 font-display text-md uppercase tracking-[0.14em] text-silver-200 hover:glow-12"
           >
             {{ item.text }}
             <span class="i-lucide-external-link text-xs opacity-60" aria-hidden="true" />
@@ -116,7 +116,7 @@ onUnmounted(() => {
           <RouterLink
             v-else
             :to="item.href"
-            class="cursor-target link-glow relative inline-block px-4 py-2 font-display text-md uppercase tracking-[0.14em] text-silver-200 hover:glow-22"
+            class="cursor-target link-glow hovertrans relative inline-block px-4 py-2 font-display text-md uppercase tracking-[0.14em] text-silver-200 hover:glow-22"
             active-class="text-violet-400"
           >
             {{ item.text }}

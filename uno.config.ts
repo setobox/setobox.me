@@ -256,6 +256,7 @@ export default defineConfig({
     ["cursor-target", "cursor-none select-none"],
     ["text-glow", "transition-text-shadow duration-300 ease-hex hover:glow-15"],
     ["link-glow", "transition-all duration-300 ease-hex hover:text-violet-300 hover:glow-15"],
+    ["hovertrans", "transition-all duration-300 ease-hex hover:scale-[1.02] hover:glow-12"],
     [
       "btn-hex",
       "inline-flex items-center gap-2 px-6 py-3 font-display text-sm uppercase tracking-[0.18em] cut-10 bg-violet-600/20 text-silver-100 border border-violet-500/60 transition-all duration-300 ease-hex hover:bg-violet-500/35 hover:text-white hover:border-violet-300",
