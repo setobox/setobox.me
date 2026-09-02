@@ -8,6 +8,7 @@ import ElectricBorder from "@/components/bits/ElectricBorder.vue";
 import FadeContent from "@/components/bits/FadeContent.vue";
 import LogoLoop from "@/components/bits/LogoLoop.vue";
 import CommentSection from "@/components/ui/CommentSection.vue";
+import EmailForm from "@/components/ui/EmailForm.vue";
 import HexTile from "@/components/ui/HexTile.vue";
 import SectionHeading from "@/components/ui/SectionHeading.vue";
 import TextType from "@/components/bits/TextType.vue";
@@ -127,6 +128,14 @@ const socialLogos = socials.map((s) => ({
               <TextType :text="['// coding.', '// learning.', '// exploring.', '// exercising.']" />
             </p>
           </div>
+        </AnimatedContent>
+      </div>
+
+      <!-- Contact -->
+      <div class="mt-24">
+        <SectionHeading title="CONTACT" kicker="open a channel" icon="i-lucide-mail" />
+        <AnimatedContent :distance="30" :duration="0.9" class="mx-auto mt-12 max-w-3xl">
+          <EmailForm />
         </AnimatedContent>
       </div>
 
