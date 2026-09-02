@@ -10,8 +10,10 @@ import LogoLoop from "@/components/bits/LogoLoop.vue";
 import CommentSection from "@/components/ui/CommentSection.vue";
 import EmailForm from "@/components/ui/EmailForm.vue";
 import HexTile from "@/components/ui/HexTile.vue";
+import NowCard from "@/components/ui/NowCard.vue";
 import SectionHeading from "@/components/ui/SectionHeading.vue";
 import TextType from "@/components/bits/TextType.vue";
+import { nowListening, nowPlaying } from "@/data/now";
 import { infoRows, profile, roles, socials, stack } from "@/data/profile";
 
 const detailRows = [
@@ -129,6 +131,47 @@ const socialLogos = socials.map((s) => ({
             </p>
           </div>
         </AnimatedContent>
+      </div>
+
+      <!-- Recently listening / playing -->
+      <div v-if="nowListening.length || nowPlaying.length" class="mt-24">
+        <SectionHeading title="NOW" kicker="spinning lately" icon="i-lucide-music" />
+
+        <div v-if="nowListening.length" class="mt-12">
+          <p class="label-mono mb-4 flex items-center gap-1.5">
+            <span class="i-lucide-headphones text-xs" aria-hidden="true" />
+            recently listening // 最近在听
+          </p>
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <NowCard
+              v-for="item in nowListening"
+              :key="item.title"
+              :title="item.title"
+              :subtitle="item.artist"
+              :cover="item.cover"
+              :href="item.href"
+              icon="i-lucide-music"
+            />
+          </div>
+        </div>
+
+        <div v-if="nowPlaying.length" class="mt-12">
+          <p class="label-mono mb-4 flex items-center gap-1.5">
+            <span class="i-lucide-gamepad-2 text-xs" aria-hidden="true" />
+            recently playing // 最近在玩
+          </p>
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <NowCard
+              v-for="item in nowPlaying"
+              :key="item.title"
+              :title="item.title"
+              :subtitle="item.note"
+              :cover="item.cover"
+              :href="item.href"
+              icon="i-lucide-gamepad-2"
+            />
+          </div>
+        </div>
       </div>
 
       <!-- Contact -->
