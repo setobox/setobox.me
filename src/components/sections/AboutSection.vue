@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /**
- * AboutSection - hexagon portrait beside a stack of label/value rows.
+ * AboutSection - a holographic character card beside a stack of label/value
+ * rows.
  *
  * Rows animate as one staggered group via a single ScrollTrigger rather than
  * per-row AnimatedContent wrappers: five triggers on five adjacent elements
@@ -9,9 +10,10 @@
 import { useTemplateRef } from "vue";
 import AnimatedContent from "@/components/bits/AnimatedContent.vue";
 import FadeContent from "@/components/bits/FadeContent.vue";
-import HexAvatar from "@/components/ui/HexAvatar.vue";
+import ProfileCard from "@/components/ui/ProfileCard.vue";
 import SectionHeading from "@/components/ui/SectionHeading.vue";
 import { scrollReveal, useGSAP } from "@/composables/useGSAP";
+import { useSmoothScroll } from "@/composables/useSmoothScroll";
 import { infoRows, profile } from "@/data/profile";
 
 interface Props {
@@ -23,6 +25,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const root = useTemplateRef<HTMLElement>("root");
+const { scrollTo } = useSmoothScroll();
+
+function goContact() {
+  scrollTo("#contact", { duration: 1 });
+}
 
 useGSAP(
   ({ reduced }) => {
@@ -57,7 +64,17 @@ useGSAP(
         class="mt-16 flex flex-col items-center gap-12 lg:mt-24 lg:flex-row lg:items-start lg:gap-20"
       >
         <FadeContent :blur="true" :duration="1000" :delay="120">
-          <HexAvatar :src="profile.avatar" :alt="`${profile.handle} avatar`" :size="270" />
+          <ProfileCard
+            :avatar-url="profile.avatar"
+            name="Setobox"
+            title="Frontend Developer"
+            :handle="profile.handle"
+            status="Online"
+            contact-text="Contact"
+            behind-glow-color="rgba(139, 92, 246, 0.6)"
+            inner-gradient="linear-gradient(145deg, rgba(139,92,246,0.35) 0%, rgba(76,217,245,0.2) 100%)"
+            @contact-click="goContact"
+          />
         </FadeContent>
 
         <div class="flex flex-1 flex-col gap-10">
