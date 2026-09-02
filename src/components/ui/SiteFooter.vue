@@ -16,15 +16,32 @@
     </div>
 
     <div class="container-page border-t border-silver-800/70 py-6">
-      <p class="text-center uppercase text-silver-300">2020 - PRESENT &copy; SETOBOX</p>
+      <p class="text-center uppercase text-silver-300">
+        2020 - PRESENT
+        <span
+          class="i-lucide-star mx-1 inline-block animate-spin text-violet-300"
+          aria-hidden="true"
+        />
+        &copy; SETOBOX
+      </p>
       <p class="text-center text-silver-300">
         <a
           href="https://icp.gov.moe/?keyword=20232190"
           target="_blank"
           rel="noreferrer"
-          class="hover:text-ink-100 focus-ring"
+          class="transition-colors duration-300 hover:text-violet-300"
         >
           萌ICP备20232190号
+        </a>
+        <span class="mx-2 text-silver-700" aria-hidden="true">·</span>
+        <a
+          href="https://travel.moe/go.html?travel=on"
+          target="_blank"
+          rel="noreferrer"
+          class="transition-colors duration-300 hover:text-violet-300"
+        >
+          <span class="i-lucide-satellite mr-1 inline-block" aria-hidden="true" />
+          MoeTravel
         </a>
       </p>
     </div>

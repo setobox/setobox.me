@@ -104,6 +104,22 @@ function next() {
       </svg>
     </div> -->
 
+    <!-- Soft glow sphere behind the headline. -->
+    <div
+      class="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[min(70vw,560px)] -translate-x-1/2 -translate-y-1/2 rounded-full"
+      style="
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(139, 92, 246, 0.4) 0%,
+          rgba(76, 217, 245, 0.12) 45%,
+          transparent 72%
+        );
+        filter: blur(48px);
+        mix-blend-mode: screen;
+      "
+      aria-hidden="true"
+    />
+
     <div class="hero-inner relative z-2 flex w-full max-w-6xl flex-col items-center">
       <h1
         class="w-full text-center font-display2 font-light uppercase leading-[1.04] tracking-[0.01em] text-silver-50 text-[clamp(2rem,5.5vw,7.5rem)]"

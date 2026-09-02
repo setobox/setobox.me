@@ -16,6 +16,13 @@ import { refreshScrollTriggers } from "@/composables/useGSAP";
 import { useSmoothScroll } from "@/composables/useSmoothScroll";
 import { useSEO } from "@/composables/useSEO";
 
+// Console easter egg.
+console.log(
+  "%c SETOBOX %c while(!dead) { time--; exp++; } ",
+  "background:#8B5CF6;color:#fff;padding:2px 8px;border-radius:3px;font-weight:700;",
+  "color:#4CD9F5;font-family:ui-monospace,monospace;",
+);
+
 const booted = ref(false);
 const navReady = ref(false);
 const { start } = useSmoothScroll();
