@@ -237,12 +237,13 @@ export default defineConfig({
   shortcuts: [
     // — Layout ————————————————————————————————————————————————
     ["container-page", "w-full max-w-1400px mx-auto px-5 sm:px-8 lg:px-12"],
-    ["section-y", "py-20 md:py-40 lg:py-48"],
+    ["section-y", "py-24 md:py-48 lg:py-56"],
+    ["section-gap", "my-20 lg:my-32"],
 
     // — Type ——————————————————————————————————————————————————
     [
       "h-section",
-      "font-display font-light uppercase tracking-[0.12em] text-silver-50 text-[clamp(2.2rem,9vw,5.5rem)] leading-none",
+      "font-display font-light uppercase tracking-[0.12em] text-silver-50 text-[clamp(2.6rem,10vw,7rem)] leading-none",
     ],
     ["label-mono", "font-mono text-[0.7rem] uppercase tracking-[0.32em] text-violet-300"],
     ["body-text", "text-silver-300 leading-relaxed"],

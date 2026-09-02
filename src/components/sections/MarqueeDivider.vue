@@ -13,14 +13,14 @@ defineProps<Props>();
 </script>
 
 <template>
-  <div class="relative overflow-hidden py-6" aria-hidden="true">
+  <div class="relative overflow-hidden section-gap" aria-hidden="true">
     <ScrollVelocity
       :texts="texts"
       :velocity="60"
       :damping="50"
       :stiffness="400"
       :velocity-mapping="{ input: [0, 1000], output: [0, 5] }"
-      class-name="font-display font-light uppercase text-[clamp(2.6rem,9vw,7rem)] leading-[1.15] tracking-[0.02em] text-stroke-silver-200"
+      class-name="font-display2 font-light uppercase text-[clamp(3rem,10vw,8rem)] leading-[1.15] tracking-[0.02em] text-stroke-silver-200"
     />
     <!-- Fade the bands into the page edges so they read as a texture rather 
          than a hard-cropped element. -->
