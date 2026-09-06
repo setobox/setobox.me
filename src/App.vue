@@ -6,7 +6,7 @@
  * route changes - re-mounting a 1200-cell canvas on every navigation would be
  * both a visible flash and a needless rebuild.
  */
-import { onMounted, ref } from "vue";
+import { onMounted, onBeforeUnmount, ref } from "vue";
 import HexGrid from "@/components/bits/HexGrid.vue";
 import HexLoader from "@/components/ui/HexLoader.vue";
 import SiteFooter from "@/components/ui/SiteFooter.vue";
@@ -16,33 +16,39 @@ import { refreshScrollTriggers } from "@/composables/useGSAP";
 import { useSmoothScroll } from "@/composables/useSmoothScroll";
 import { useSEO } from "@/composables/useSEO";
 
-// Console easter egg.
-console.log(
-  "%c SETOBOX %c while(!dead) { time--; exp++; } ",
-  "background:#8B5CF6;color:#fff;padding:2px 8px;border-radius:3px;font-weight:700;",
-  "color:#4CD9F5;font-family:ui-monospace,monospace;",
-);
-
 const booted = ref(false);
-const navReady = ref(false);
+const loaderActive = ref(true);
+let loaderTimeout: ReturnType<typeof setTimeout> | undefined;
 const { start } = useSmoothScroll();
 
 // Dynamic SEO meta tags
 useSEO();
 
 function onLoaderDone() {
+  loaderActive.value = false;
+  booted.value = true;
+  clearTimeout(loaderTimeout);
   // Reveal changed layout heights; recompute every trigger once it settles.
   refreshScrollTriggers(0);
 }
 
 function onLoaderReveal() {
   booted.value = true;
-  navReady.value = true;
 }
 
 onMounted(() => {
+  // Console easter egg.
+  console.log(
+    "%c SETOBOX %c while(!dead) { time--; exp++; } ",
+    "background:#8B5CF6;color:#fff;padding:2px 8px;border-radius:3px;font-weight:700;",
+    "color:#4CD9F5;font-family:ui-monospace,monospace;",
+  );
+
+  // Prevent a stalled opening animation from blocking the page.
+  loaderTimeout = setTimeout(onLoaderDone, 6000);
   start();
 });
+onBeforeUnmount(() => clearTimeout(loaderTimeout));
 </script>
 
 <template>
@@ -76,10 +82,12 @@ onMounted(() => {
   <!-- Overlays -->
   <div class="scanlines" aria-hidden="true" />
   <div class="vignette" aria-hidden="true" />
-  <TargetCursor :spin-duration="4" />
-  <HexLoader @reveal="onLoaderReveal" @done="onLoaderDone" />
+  <ClientOnly>
+    <TargetCursor :spin-duration="4" />
+    <HexLoader v-if="loaderActive" @reveal="onLoaderReveal" @done="onLoaderDone" />
+  </ClientOnly>
 
-  <SiteNav :ready="navReady" />
+  <SiteNav :ready="booted" />
 
   <main class="relative overflow-x-clip">
     <RouterView v-slot="{ Component }">

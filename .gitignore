@@ -37,6 +37,7 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+.vite-ssg-temp/
 
 # Generated at build time by UnoCSS presetWebFonts' local processor.
 /public/assets/fonts/

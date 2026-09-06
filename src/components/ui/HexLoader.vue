@@ -61,6 +61,7 @@ const cells = Array.from({ length: Math.ceil(VIEW / stepY) + 1 }, (_, row) =>
 
 function finish() {
   hidden.value = true;
+  emit("reveal");
   emit("done");
 }
 

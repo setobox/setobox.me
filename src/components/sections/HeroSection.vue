@@ -8,7 +8,6 @@
  */
 import { computed, useTemplateRef } from "vue";
 import AnimatedContent from "@/components/bits/AnimatedContent.vue";
-import TextType from "@/components/bits/TextType.vue";
 import { useSmoothScroll } from "@/composables/useSmoothScroll";
 import { gsap, useGSAP } from "@/composables/useGSAP";
 import { profile, site } from "@/data/profile";
@@ -126,7 +125,7 @@ function next() {
         translate="no"
       >
         <AnimatedContent
-          v-if="props.ready"
+          :enabled="props.ready"
           :distance="100"
           direction="vertical"
           :reverse="false"
@@ -145,7 +144,7 @@ function next() {
           </p>
         </AnimatedContent>
         <AnimatedContent
-          v-if="props.ready"
+          :enabled="props.ready"
           :distance="100"
           direction="vertical"
           :reverse="false"
@@ -189,13 +188,13 @@ function next() {
     </div>
 
     <!-- Scroll cue. -->
-    <button
-      type="button"
+    <a
+      href="#about"
       class="hero-cue cursor-target absolute bottom-9 left-1/2 z-2 flex -translate-x-1/2 flex-col items-center gap-2 text-silver-500 transition-colors duration-300 hover:text-violet-300"
       aria-label="Scroll to next section"
-      @click="next"
+      @click.prevent="next"
     >
       <span class="i-lucide-chevron-down animate-hex-pulse text-6xl" aria-hidden="true" />
-    </button>
+    </a>
   </section>
 </template>

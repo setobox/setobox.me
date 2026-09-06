@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 interface AnimatedContentProps {
+  enabled?: boolean;
   distance?: number;
   direction?: "vertical" | "horizontal";
   reverse?: boolean;
@@ -20,6 +21,7 @@ interface AnimatedContentProps {
 }
 
 const props = withDefaults(defineProps<AnimatedContentProps>(), {
+  enabled: true,
   distance: 100,
   direction: "vertical",
   reverse: false,
@@ -53,6 +55,7 @@ function createAnimation() {
   if (!el) return;
 
   cleanupAnimation();
+  if (!props.enabled) return;
 
   const axis = props.direction === "horizontal" ? "x" : "y";
   const offset = props.reverse ? -props.distance : props.distance;
@@ -87,6 +90,7 @@ onMounted(() => {
 
 watch(
   () => [
+    props.enabled,
     props.distance,
     props.direction,
     props.reverse,

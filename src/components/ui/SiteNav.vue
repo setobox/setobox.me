@@ -14,6 +14,7 @@ import { navItems, site } from "@/data/profile";
 const open = ref(false);
 const hidden = ref(false);
 const scrolled = ref(false);
+const mounted = ref(false);
 const route = useRoute();
 const props = defineProps<{ ready: boolean }>();
 const root = useTemplateRef<HTMLElement>("root");
@@ -64,6 +65,7 @@ watch(
 );
 
 onMounted(() => {
+  mounted.value = true;
   lastY = window.scrollY;
   window.addEventListener("scroll", onScroll, { passive: true });
 });
@@ -86,7 +88,7 @@ onUnmounted(() => {
         : 'border-b border-transparent',
     ]"
   >
-    <nav class="w-full px-5 sm:px-6 lg:px-8 flex items-center justify-between py-2.5">
+    <nav class="w-full px-5 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between py-2.5">
       <RouterLink to="/" class="cursor-target group flex items-center gap-2.5">
         <img
           src="/hexagon-white.svg"
@@ -101,7 +103,10 @@ onUnmounted(() => {
         </span>
       </RouterLink>
 
-      <ul class="hidden items-center gap-1 md:flex">
+      <ul
+        class="items-center gap-1 md:flex"
+        :class="mounted ? 'hidden' : 'flex w-full flex-wrap justify-center md:w-auto'"
+      >
         <li v-for="item in navItems" :key="item.href">
           <a
             v-if="isExternal(item.href)"
@@ -125,6 +130,7 @@ onUnmounted(() => {
       </ul>
 
       <button
+        v-if="mounted"
         type="button"
         class="cursor-target -mr-2 p-2 text-silver-100 md:hidden"
         :aria-expanded="open"

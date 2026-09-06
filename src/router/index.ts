@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
 import { site } from "@/data/profile";
 
 interface RouteMeta {
@@ -8,7 +8,7 @@ interface RouteMeta {
   ogImage?: string;
 }
 
-const routes: RouteRecordRaw[] = [
+export const routes: RouteRecordRaw[] = [
   {
     path: "/",
     name: "home",
@@ -40,18 +40,3 @@ const routes: RouteRecordRaw[] = [
     } satisfies RouteMeta,
   },
 ];
-
-export const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
-  // Jump instantly rather than smooth-scrolling: the route transition already
-  // fades the old page out, and animating both at once reads as a stutter.
-  scrollBehavior(_to, _from, savedPosition) {
-    return savedPosition ?? { top: 0 };
-  },
-});
-
-router.afterEach((to) => {
-  const title = to.meta.title;
-  if (typeof title === "string") document.title = title;
-});

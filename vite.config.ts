@@ -2,21 +2,14 @@ import { fileURLToPath, URL } from "node:url";
 import vue from "@vitejs/plugin-vue";
 import UnoCSS from "unocss/vite";
 import { defineConfig } from "vite-plus";
-import { cloudflare } from "@cloudflare/vite-plugin";
-import sitemap from "vite-plugin-sitemap";
+import type { ViteSSGOptions } from "vite-ssg";
 
-export default defineConfig({
-  plugins: [
-    vue(),
-    UnoCSS(),
-    cloudflare(),
-    sitemap({
-      hostname: "https://setobox.me",
-      dynamicRoutes: ["/", "/about"],
-      changefreq: "monthly",
-      priority: 1.0,
-    }),
-  ],
+export default defineConfig(({ isSsrBuild }) => ({
+  plugins: [vue(), UnoCSS()],
+
+  ssgOptions: {
+    includedRoutes: () => ["/", "/about", "/404"],
+  } satisfies ViteSSGOptions,
 
   resolve: {
     alias: {
@@ -28,17 +21,19 @@ export default defineConfig({
     // GSAP is the heaviest single dependency and the motion layer is not
     // needed to paint the shell, so it gets its own chunk. Rolldown's
     // `manualChunks` is function-only, unlike Rollup's object form.
-    rollupOptions: {
-      output: {
-        manualChunks(id: string) {
-          if (id.includes("node_modules/gsap")) return "gsap";
-          if (/node_modules[/\\](vue|vue-router|@vue|lenis)[/\\]/.test(id)) {
-            return "vendor";
-          }
-          return undefined;
+    rollupOptions: isSsrBuild
+      ? {}
+      : {
+          output: {
+            manualChunks(id: string) {
+              if (id.includes("node_modules/gsap")) return "gsap";
+              if (/node_modules[/\\](vue|vue-router|@vue|lenis)[/\\]/.test(id)) {
+                return "vendor";
+              }
+              return undefined;
+            },
+          },
         },
-      },
-    },
   },
 
   staged: {
@@ -53,4 +48,4 @@ export default defineConfig({
     rules: { "vite-plus/prefer-vite-plus-imports": "error" },
     options: { typeAware: true, typeCheck: true },
   },
-});
+}));

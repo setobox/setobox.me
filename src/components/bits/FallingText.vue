@@ -4,8 +4,9 @@
   Adapted for Setobox Home: highlighted-word color changed to the violet token.
 -->
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 import Matter from "matter-js";
+import { prefersReducedMotion } from "@/composables/useGSAP";
 
 interface FallingTextProps {
   text?: string;
@@ -42,24 +43,21 @@ let mouseConstraint: Matter.MouseConstraint | null = null;
 let wordBodies: Array<{ elem: HTMLElement; body: Matter.Body }> = [];
 let intersectionObserver: IntersectionObserver | null = null;
 let animationFrameId: number | null = null;
+let autoTimer: ReturnType<typeof setTimeout> | undefined;
+let mounted = false;
 
-const createTextHTML = () => {
-  if (!textRef.value) return;
-
-  const words = props.text.split(" ");
-  const newHTML = words
-    .map((word) => {
-      const isHighlighted = props.highlightWords.some((hw) => word.startsWith(hw));
-      return `<span class="inline-block mx-[2px] select-none ${isHighlighted ? "text-violet-300 font-bold" : ""}">${word}</span>`;
-    })
-    .join(" ");
-
-  textRef.value.innerHTML = newHTML;
-};
+// Vue owns the text nodes so the same words exist before and after hydration.
+const words = computed(() =>
+  props.text.split(" ").map((text) => ({
+    text,
+    highlighted: props.highlightWords.some((word) => text.startsWith(word)),
+  })),
+);
 
 const setupTrigger = () => {
+  if (!mounted || prefersReducedMotion()) return;
   if (props.trigger === "auto") {
-    setTimeout(() => {
+    autoTimer = setTimeout(() => {
       effectStarted.value = true;
     }, 100);
     return;
@@ -80,15 +78,15 @@ const setupTrigger = () => {
 };
 
 const handleTrigger = () => {
+  if (prefersReducedMotion()) return;
   if (!effectStarted.value && (props.trigger === "click" || props.trigger === "hover")) {
     effectStarted.value = true;
   }
 };
 
 const startPhysics = async () => {
-  if (!containerRef.value || !canvasContainerRef.value || !textRef.value) return;
-
   await nextTick();
+  if (!mounted || !containerRef.value || !canvasContainerRef.value || !textRef.value) return;
 
   const { Engine, Render, World, Bodies, Runner, Mouse, MouseConstraint } = Matter;
 
@@ -190,6 +188,7 @@ const startPhysics = async () => {
 };
 
 const cleanup = () => {
+  clearTimeout(autoTimer);
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
@@ -220,25 +219,18 @@ const cleanup = () => {
   }
 
   mouseConstraint = null;
+  wordBodies.forEach(({ elem }) => elem.removeAttribute("style"));
   wordBodies = [];
 };
 
 watch(
-  () => [props.text, props.highlightWords],
-  () => {
-    createTextHTML();
-  },
-  { immediate: true, deep: true },
-);
-
-watch(
-  () => props.trigger,
+  () => [props.text, props.highlightWords, props.trigger],
   () => {
     effectStarted.value = false;
     cleanup();
     setupTrigger();
   },
-  { immediate: true },
+  { deep: true, flush: "post" },
 );
 
 watch(
@@ -262,11 +254,12 @@ watch(
 );
 
 onMounted(() => {
-  createTextHTML();
+  mounted = true;
   setupTrigger();
 });
 
 onUnmounted(() => {
+  mounted = false;
   cleanup();
 });
 </script>
@@ -285,7 +278,15 @@ onUnmounted(() => {
         fontSize: props.fontSize,
         lineHeight: 1.4,
       }"
-    />
+    >
+      <template v-for="(word, index) in words" :key="`${index}-${word.text}`">
+        <span
+          class="inline-block mx-[2px] select-none"
+          :class="{ 'text-violet-300 font-bold': word.highlighted }"
+          >{{ word.text }}</span
+        >{{ " " }}
+      </template>
+    </div>
 
     <div class="top-0 left-0 z-0 absolute" ref="canvasContainerRef" />
   </div>

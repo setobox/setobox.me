@@ -42,8 +42,8 @@ watch(
       :alt="props.alt"
       loading="lazy"
       decoding="async"
-      class="h-full w-full object-cover transition-opacity duration-700"
-      :class="[loaded ? 'opacity-100' : 'opacity-0', props.imgClass]"
+      class="relative h-full w-full object-cover"
+      :class="props.imgClass"
       @load="loaded = true"
       @error="failed = true"
     />

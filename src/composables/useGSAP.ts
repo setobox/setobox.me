@@ -6,7 +6,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 // Dev-only handle so scroll-reveal geometry can be inspected from the console
 // (or a headless probe) without shipping anything to production.
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV && !import.meta.env.SSR) {
   (window as unknown as Record<string, unknown>).__gsap = { gsap, ScrollTrigger };
 }
 

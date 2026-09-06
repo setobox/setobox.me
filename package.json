@@ -3,11 +3,11 @@
   "type": "module",
   "scripts": {
     "dev": "vp dev",
-    "build": "vue-tsc --build && vp build",
-    "preview": "vp preview",
+    "build": "vue-tsc --build && vite-ssg build",
+    "preview": "wrangler dev --local --config wrangler.jsonc",
     "typecheck": "vue-tsc --build",
     "prepare": "vp config",
-    "deploy": "pnpm run build && wrangler deploy"
+    "deploy": "pnpm run build && wrangler deploy --config wrangler.jsonc"
   },
   "dependencies": {
     "@emailjs/browser": "catalog:frontend",
@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@antfu/ni": "^30.5.0",
-    "@cloudflare/vite-plugin": "catalog:build",
     "@iconify-json/lucide": "catalog:dev",
     "@iconify-json/simple-icons": "catalog:dev",
     "@tsconfig/node24": "catalog:build",
@@ -36,8 +35,8 @@
     "typescript": "~6.0.2",
     "unocss": "catalog:dev",
     "vite": "catalog:build",
-    "vite-plugin-sitemap": "catalog:build",
     "vite-plus": "catalog:build",
+    "vite-ssg": "^28.3.0",
     "vue-tsc": "catalog:dev",
     "wrangler": "catalog:build"
   },

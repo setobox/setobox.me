@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, computed, useTemplateRef } from "vue";
 import { gsap } from "gsap";
+import { prefersReducedMotion } from "@/composables/useGSAP";
 
 interface TextTypeProps {
   className?: string;
@@ -40,7 +41,9 @@ const props = withDefaults(defineProps<TextTypeProps>(), {
   reverseMode: false,
 });
 
-const displayedText = ref("");
+const initialText = (Array.isArray(props.text) ? props.text[0] : props.text) ?? "";
+const displayedText = ref(props.reverseMode ? [...initialText].reverse().join("") : initialText);
+const started = ref(false);
 const currentCharIndex = ref(0);
 const isDeleting = ref(false);
 const currentTextIndex = ref(0);
@@ -107,9 +110,9 @@ const executeTypingAnimation = () => {
 };
 
 watch(
-  [displayedText, currentCharIndex, isDeleting, isVisible],
+  [displayedText, currentCharIndex, isDeleting, isVisible, started],
   () => {
-    if (!isVisible.value) return;
+    if (!started.value || !isVisible.value) return;
     clearTimeoutIfNeeded();
 
     if (currentCharIndex.value === 0 && !isDeleting.value && displayedText.value === "") {
@@ -124,6 +127,9 @@ watch(
 );
 
 onMounted(() => {
+  if (prefersReducedMotion()) return;
+  displayedText.value = "";
+  started.value = true;
   if (props.showCursor && cursorRef.value) {
     gsap.set(cursorRef.value, { opacity: 1 });
     gsap.to(cursorRef.value, {
@@ -153,6 +159,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   clearTimeoutIfNeeded();
+  if (cursorRef.value) gsap.killTweensOf(cursorRef.value);
 });
 </script>
 
