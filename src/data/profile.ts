@@ -19,7 +19,9 @@ export interface Social {
 }
 
 export const site = {
-  name: "Setobox Home",
+  name: "Setobox Official / 姬顶盒の箱庭世界",
+  identity: "Setobox / 姬顶盒",
+  url: "https://setobox.me/",
   short: "SETOBOX",
   tagline: "while(!dead) { time--; exp++; }",
 } as const;

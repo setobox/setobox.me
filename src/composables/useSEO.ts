@@ -1,49 +1,69 @@
 import { useHead } from "@unhead/vue";
 import { useRoute } from "vue-router";
+import { profile, site, socials } from "@/data/profile";
+import type { RouteMeta } from "@/router";
 
-interface RouteMeta {
-  title?: string;
-  description?: string;
-  keywords?: string;
-  ogImage?: string;
-}
+const identityGraph = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${site.url}#person`,
+      name: "Setobox",
+      alternateName: "姬顶盒",
+      url: site.url,
+      image: new URL(profile.avatar, site.url).href,
+      jobTitle: "Frontend Developer",
+      sameAs: socials
+        .filter(({ name }) => ["GitHub", "Bilibili", "Blog"].includes(name))
+        .map(({ href }) => href),
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${site.url}#website`,
+      name: site.name,
+      alternateName: ["Setobox", "姬顶盒の箱庭世界"],
+      url: site.url,
+      inLanguage: "zh-CN",
+      publisher: { "@id": `${site.url}#person` },
+    },
+  ],
+};
 
-/**
- * Dynamic SEO meta tag management.
- *
- * Watches route changes and updates document title, meta descriptions,
- * Open Graph tags, Twitter Cards, and canonical URLs based on route meta.
- */
 export function useSEO() {
   const route = useRoute();
-  const baseUrl = "https://setobox.me";
-
-  // Register the head entry while setup's injection context is active. Unhead
-  // tracks the route values read by this getter and updates the entry whenever
-  // navigation changes.
   useHead(() => {
-    const meta = route.meta as RouteMeta;
-    const url = `${baseUrl}${route.path}`;
-    const title = meta.title || "Setobox Home";
-    const description =
-      meta.description || "Setobox Home — 姬顶盒的个人主页。Frontend developer, Yak Shaver.";
-    const keywords = meta.keywords || "setobox, frontend developer, vue, typescript, gsap";
-    const ogImage = meta.ogImage || `${baseUrl}/img/og-image.jpg`;
-
+    const meta = route.meta as Partial<RouteMeta>;
+    const title = meta.title || site.name;
+    const description = meta.description || `${site.identity}的个人主页。`;
+    const canonical = meta.canonicalPath ? new URL(meta.canonicalPath, site.url).href : undefined;
+    const image = meta.ogImage || new URL(profile.avatar, site.url).href;
     return {
+      htmlAttrs: { lang: "zh-CN" },
       title,
       meta: [
         { name: "description", content: description },
-        { name: "keywords", content: keywords },
+        { name: "keywords", content: meta.keywords },
+        { name: "robots", content: meta.noindex ? "noindex, follow" : "index, follow" },
+        { property: "og:site_name", content: site.name },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
-        { property: "og:url", content: url },
-        { property: "og:image", content: ogImage },
+        ...(canonical ? [{ property: "og:url", content: canonical }] : []),
+        { property: "og:image", content: image },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
-        { name: "twitter:image", content: ogImage },
+        { name: "twitter:image", content: image },
       ],
-      link: [{ rel: "canonical", href: url }],
+      link: canonical ? [{ rel: "canonical", href: canonical }] : [],
+      script: meta.noindex
+        ? []
+        : [
+            {
+              key: "site-identity",
+              type: "application/ld+json",
+              innerHTML: JSON.stringify(identityGraph).replace(/</g, "\\u003c"),
+            },
+          ],
     };
   });
 }

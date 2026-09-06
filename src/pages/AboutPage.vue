@@ -32,6 +32,7 @@ const socialLogos = socials.map((s) => ({
 
 <template>
   <div class="pt-28 md:pt-36">
+    <h1 class="sr-only">关于 Setobox / 姬顶盒</h1>
     <div class="container-page">
       <SectionHeading title="ABOUT" kicker="the long version" icon="i-lucide-user" />
 

@@ -1,11 +1,13 @@
 import type { RouteRecordRaw } from "vue-router";
 import { site } from "@/data/profile";
 
-interface RouteMeta {
+export interface RouteMeta {
   title: string;
   description?: string;
   keywords?: string;
   ogImage?: string;
+  canonicalPath?: string;
+  noindex?: boolean;
 }
 
 export const routes: RouteRecordRaw[] = [
@@ -14,8 +16,10 @@ export const routes: RouteRecordRaw[] = [
     name: "home",
     component: () => import("@/pages/HomePage.vue"),
     meta: {
-      title: "首页 - Setobox(姬顶盒)",
-      description: "Setobox 的箱庭世界。",
+      title: site.name,
+      description:
+        "Setobox / 姬顶盒的个人主页与箱庭世界，分享前端开发、项目作品、技术兴趣与日常探索。",
+      canonicalPath: "/",
       keywords:
         "setobox, 姬顶盒, frontend developer, vue, typescript, gsap, web developer, 前端开发",
     } satisfies RouteMeta,
@@ -25,8 +29,10 @@ export const routes: RouteRecordRaw[] = [
     name: "about",
     component: () => import("@/pages/AboutPage.vue"),
     meta: {
-      title: "关于 - Setobox(姬顶盒)",
-      description: "了解 Setobox。",
+      title: "关于 Setobox / 姬顶盒",
+      description:
+        "了解 Setobox / 姬顶盒：前端开发者与 ACG 爱好者的个人介绍、技术栈、兴趣和联系方式。",
+      canonicalPath: "/about",
       keywords: "about setobox, developer profile, tech stack, frontend developer shanghai",
     } satisfies RouteMeta,
   },
@@ -35,8 +41,9 @@ export const routes: RouteRecordRaw[] = [
     name: "not-found",
     component: () => import("@/pages/NotFoundPage.vue"),
     meta: {
-      title: `404 - ${site.name}`,
-      description: "页面未找到 - Setobox Home",
+      title: "404 - Setobox / 姬顶盒",
+      description: "页面未找到 - Setobox / 姬顶盒",
+      noindex: true,
     } satisfies RouteMeta,
   },
 ];

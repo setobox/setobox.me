@@ -120,7 +120,8 @@ function next() {
     />
 
     <div class="hero-inner relative z-2 flex w-full max-w-6xl flex-col items-center">
-      <h1
+      <h1 class="sr-only">{{ site.identity }}</h1>
+      <div
         class="w-full text-center font-display2 font-light uppercase leading-[1.04] tracking-[0.01em] text-silver-50 text-[clamp(2rem,5.5vw,7.5rem)]"
         translate="no"
       >
@@ -167,7 +168,7 @@ function next() {
             </span>
           </p>
         </AnimatedContent>
-      </h1>
+      </div>
 
       <div class="hero-meta mt-9 flex flex-col items-center gap-5">
         <!-- Fixed width, left-aligned: sizing to the current text would make
