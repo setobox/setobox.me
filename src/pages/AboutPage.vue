@@ -12,15 +12,10 @@ import EmailForm from "@/components/ui/EmailForm.vue";
 import HexTile from "@/components/ui/HexTile.vue";
 import NowCard from "@/components/ui/NowCard.vue";
 import SectionHeading from "@/components/ui/SectionHeading.vue";
-import TextType from "@/components/bits/TextType.vue";
 import { nowListening, nowPlaying } from "@/data/now";
 import { infoRows, profile, roles, socials, stack } from "@/data/profile";
 
-const detailRows = [
-  ...infoRows,
-  { label: "A.K.A.", value: profile.aka.join(" / "), icon: "i-lucide-layers" },
-  { label: "EMAIL", value: profile.email, icon: "i-lucide-mail" },
-];
+const detailRows = [...infoRows, { label: "EMAIL", value: profile.email, icon: "i-lucide-mail" }];
 
 /** Icons fed into the logo marquee; each links out to the matching profile. */
 const socialLogos = socials.map((s) => ({
@@ -32,9 +27,9 @@ const socialLogos = socials.map((s) => ({
 
 <template>
   <div class="pt-28 md:pt-36">
-    <h1 class="sr-only">关于 Setobox / 姬顶盒</h1>
+    <h1 class="sr-only">关于我</h1>
     <div class="container-page">
-      <SectionHeading title="ABOUT" kicker="the long version" icon="i-lucide-user" />
+      <SectionHeading title="ABOUT" kicker="个人资料" icon="i-lucide-user" />
 
       <!-- Portrait + identity table -->
       <div class="mt-16 flex flex-col gap-12 lg:mt-20 lg:flex-row lg:gap-16">
@@ -98,9 +93,27 @@ const socialLogos = socials.map((s) => ({
         </div>
       </div>
 
+      <!-- All links -->
+      <div class="mt-24 pb-8">
+        <SectionHeading title="ELSEWHERE" kicker="社交账号与博客" icon="i-lucide-globe" />
+        <div class="mt-12">
+          <LogoLoop
+            :logos="socialLogos"
+            :speed="80"
+            :logo-height="48"
+            :gap="48"
+            :pause-on-hover="true"
+            :fade-out="true"
+            fade-out-color="#060413"
+            :scale-on-hover="true"
+            aria-label="社交账号与博客"
+          />
+        </div>
+      </div>
+
       <!-- Roles -->
       <div class="mt-24">
-        <SectionHeading title="ROLES" kicker="hats worn" icon="i-lucide-wand-sparkles" />
+        <SectionHeading title="ROLES" kicker="职业与兴趣" icon="i-lucide-wand-sparkles" />
         <div class="mt-12 flex flex-wrap justify-center gap-x-2">
           <div v-for="(role, i) in roles" :key="role.name" :class="i % 2 === 1 ? 'sm:mt-16' : ''">
             <HexTile :label="role.name" :icon="role.icon" accent :size="110" />
@@ -110,7 +123,7 @@ const socialLogos = socials.map((s) => ({
 
       <!-- Stack -->
       <div class="mt-24">
-        <SectionHeading title="STACK" kicker="tools of trade" icon="i-lucide-cpu" />
+        <SectionHeading title="STACK" kicker="技术栈" icon="i-lucide-cpu" />
         <div class="mt-12 flex flex-wrap justify-center gap-x-1.5">
           <div v-for="(tech, i) in stack" :key="tech.name" :class="i % 2 === 1 ? 'mt-11' : ''">
             <HexTile :label="tech.name" :accent="tech.key" :size="86" />
@@ -120,15 +133,13 @@ const socialLogos = socials.map((s) => ({
 
       <!-- Interests -->
       <div class="mt-24">
-        <SectionHeading title="INTERESTS" kicker="off the clock" icon="i-lucide-sparkles" />
+        <SectionHeading title="INTERESTS" kicker="兴趣爱好" icon="i-lucide-sparkles" />
         <AnimatedContent :distance="30" :duration="0.9" class="mt-12">
           <div
             class="mx-auto max-w-3xl cut-16 border border-silver-800 bg-void-800/50 p-8 backdrop-blur-sm"
           >
-            <p class="body-text leading-loose">喜欢新奇的事物，痴迷于技术与艺术的结合。</p>
-            <p class="body-text leading-loose">......</p>
-            <p class="mt-6 font-mono text-xs text-cyan-200">
-              <TextType :text="['// coding.', '// learning.', '// exploring.', '// exercising.']" />
+            <p class="body-text leading-loose">
+              关注编程、交互设计和动画，业余爱好包括游戏、音乐和运动。
             </p>
           </div>
         </AnimatedContent>
@@ -136,7 +147,7 @@ const socialLogos = socials.map((s) => ({
 
       <!-- Recently listening / playing -->
       <div v-if="nowListening.length || nowPlaying.length" class="mt-24">
-        <SectionHeading title="NOW" kicker="spinning lately" icon="i-lucide-music" />
+        <SectionHeading title="NOW" kicker="近期记录" icon="i-lucide-music" />
 
         <div v-if="nowListening.length" class="mt-12">
           <p class="label-mono mb-4 flex items-center gap-1.5">
@@ -177,37 +188,19 @@ const socialLogos = socials.map((s) => ({
 
       <!-- Contact -->
       <div class="mt-24">
-        <SectionHeading title="CONTACT" kicker="open a channel" icon="i-lucide-mail" />
+        <SectionHeading title="CONTACT" kicker="联系方式" icon="i-lucide-mail" />
         <AnimatedContent :distance="30" :duration="0.9" class="mx-auto mt-12 max-w-3xl">
-          <EmailForm />
+          <a
+            :href="`mailto:${profile.email}`"
+            class="link-glow block break-all text-center font-mono text-silver-100"
+            >{{ profile.email }}</a
+          >
+          <EmailForm class="mt-6" />
         </AnimatedContent>
       </div>
 
-      <!-- All links -->
-      <div class="mt-24 pb-8">
-        <SectionHeading title="ELSEWHERE" kicker="find me around" icon="i-lucide-globe" />
-        <div class="mt-12">
-          <LogoLoop
-            :logos="socialLogos"
-            :speed="80"
-            :logo-height="48"
-            :gap="48"
-            :pause-on-hover="true"
-            :fade-out="true"
-            fade-out-color="#060413"
-            :scale-on-hover="true"
-            aria-label="Find me around"
-          />
-        </div>
-      </div>
-
       <!-- Comments (giscus) -->
-      <div class="mt-24 pb-8">
-        <SectionHeading title="MESSAGES" kicker="leave a message" icon="i-lucide-message-circle" />
-        <div class="mt-12">
-          <CommentSection />
-        </div>
-      </div>
+      <CommentSection class="mt-24 pb-8" />
     </div>
   </div>
 </template>

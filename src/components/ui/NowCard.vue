@@ -18,7 +18,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   subtitle: "",
-  icon: "i-lucide-sparkles",
+  icon: "i-lucide-image",
 });
 </script>
 

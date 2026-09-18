@@ -19,11 +19,10 @@ export interface Social {
 }
 
 export const site = {
-  name: "Setobox Official / 姬顶盒の箱庭世界",
+  name: "Setobox / 姬顶盒官方网站",
   identity: "Setobox / 姬顶盒",
   url: "https://setobox.me/",
   short: "SETOBOX",
-  tagline: "while(!dead) { time--; exp++; }",
 } as const;
 
 /**
@@ -45,27 +44,22 @@ export const profile = {
   email: "hi@setobox.me",
 
   /** Two-line hero headline; each entry is one line. */
-  headline:
-    // ["TIME DECREASES,", "EXPERIENCE INCREASES"],
-    ["TURNING CODE,", "INTO EXPERIENCES"],
-
-  /** Cycled by the typewriter under the hero. */
-  typed: ["while(!dead) { time--; exp++; }"],
+  headline: ["WHILE(!DEAD)", "{ TIME--; EXP++; }"],
 
   intro: [
-    "Frontend developer, Yak Shaver.",
-    "ACG(Anime、Code、Game) 爱好者。",
-    "喜欢新鲜事物、尝试新技术，什么都想学一点。",
-    "喜欢创造(/gamemode 1)、音乐、运动（标准引体18+）。",
+    "全站开发、设计。",
+    "兴趣包括动画、编程和游戏。",
+    "关注前端技术与交互设计。",
+    "业余爱好包括音乐和运动。",
   ],
 } as const;
 
 export const infoRows: InfoRow[] = [
-  { label: "NAME", value: "Setobox", icon: "i-lucide-user" },
+  { label: "NAME", value: "Setobox(姬顶盒)", icon: "i-lucide-user" },
   { label: "BIRTH", value: "2000-06-12", icon: "i-lucide-cake" },
   { label: "LOCATION", value: "Shanghai, CN", icon: "i-lucide-map-pin" },
-  { label: "FIELD", value: "Frontend / Yak Shaver", icon: "i-lucide-terminal" },
-  { label: "INTEREST", value: "Tech / Art", icon: "i-lucide-sparkles" },
+  { label: "FIELD", value: "Full-Stack", icon: "i-lucide-terminal" },
+  { label: "INTEREST", value: "Tech / Design / Game", icon: "i-lucide-sparkles" },
 ];
 
 /** The honeycomb of roles. Order drives the staggered reveal. */
@@ -136,6 +130,6 @@ export const socials: Social[] = [
 export const navItems = [
   { text: "Home", href: "/" },
   { text: "About", href: "/about" },
-  { text: "Use", href: "https://blog.setobox.me/use" },
+  { text: "Uses", href: "https://blog.setobox.me/use" },
   { text: "Posts", href: "https://blog.setobox.me" },
 ] as const;

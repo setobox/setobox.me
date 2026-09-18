@@ -37,13 +37,6 @@ function onLoaderReveal() {
 }
 
 onMounted(() => {
-  // Console easter egg.
-  console.log(
-    "%c SETOBOX %c while(!dead) { time--; exp++; } ",
-    "background:#8B5CF6;color:#fff;padding:2px 8px;border-radius:3px;font-weight:700;",
-    "color:#4CD9F5;font-family:ui-monospace,monospace;",
-  );
-
   // Prevent a stalled opening animation from blocking the page.
   loaderTimeout = setTimeout(onLoaderDone, 6000);
   start();
@@ -65,23 +58,22 @@ onBeforeUnmount(() => clearTimeout(loaderTimeout));
       :shock-strength="-5"
       :resistance="5000"
       :return-duration="0.3"
-      class-name="custom-dot-grid"
     />
     <!-- Soft glows over the lattice, so the grid never reads as flat graph paper. -->
     <div
-      class="pointer-events-none absolute inset-0"
-      style="
-        background:
-          radial-gradient(60% 45% at 50% 0%, rgba(139, 92, 246, 0.16), transparent 70%),
-          radial-gradient(50% 40% at 100% 100%, rgba(255, 46, 158, 0.1), transparent 70%),
-          radial-gradient(45% 35% at 0% 60%, rgba(76, 217, 245, 0.08), transparent 70%);
-      "
+      class="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_0%,rgba(139,92,246,0.16),transparent_70%),radial-gradient(50%_40%_at_100%_100%,rgba(255,46,158,0.1),transparent_70%),radial-gradient(45%_35%_at_0%_60%,rgba(76,217,245,0.08),transparent_70%)]"
     />
   </div>
 
   <!-- Overlays -->
-  <div class="scanlines" aria-hidden="true" />
-  <div class="vignette" aria-hidden="true" />
+  <div
+    class="pointer-events-none fixed inset-0 z-9000 bg-[image:repeating-linear-gradient(to_bottom,transparent_0,transparent_2px,rgba(0,0,0,0.42)_2px,rgba(0,0,0,0.42)_4px)] mix-blend-multiply opacity-35"
+    aria-hidden="true"
+  />
+  <div
+    class="pointer-events-none fixed inset-0 z-8900 bg-[radial-gradient(115%_105%_at_50%_50%,transparent_55%,rgba(3,2,10,0.75)_100%)]"
+    aria-hidden="true"
+  />
   <ClientOnly>
     <TargetCursor :spin-duration="4" />
     <HexLoader v-if="loaderActive" @reveal="onLoaderReveal" @done="onLoaderDone" />
@@ -99,3 +91,26 @@ onBeforeUnmount(() => clearTimeout(loaderTimeout));
 
   <SiteFooter />
 </template>
+
+<style scoped>
+/* Route transition — a short chamfered wipe rather than a plain fade. */
+.route-enter-active,
+.route-leave-active {
+  transition:
+    opacity 0.45s cubic-bezier(0.215, 0.61, 0.355, 1),
+    filter 0.45s cubic-bezier(0.215, 0.61, 0.355, 1),
+    transform 0.45s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.route-enter-from {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(24px);
+}
+
+.route-leave-to {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(-24px);
+}
+</style>

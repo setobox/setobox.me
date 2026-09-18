@@ -13,7 +13,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <div class="relative overflow-hidden section-gap" aria-hidden="true">
+  <div class="relative overflow-hidden my-20 lg:my-32" aria-hidden="true">
     <ScrollVelocity
       :texts="texts"
       :velocity="60"

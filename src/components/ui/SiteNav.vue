@@ -135,7 +135,7 @@ onUnmounted(() => {
         class="cursor-target -mr-2 p-2 text-silver-100 md:hidden"
         :aria-expanded="open"
         aria-controls="mobile-nav"
-        aria-label="Toggle navigation"
+        :aria-label="open ? '关闭导航' : '打开导航'"
         @click="open = !open"
       >
         <span :class="open ? 'i-lucide-x' : 'i-lucide-menu'" class="text-2xl" aria-hidden="true" />
@@ -179,11 +179,6 @@ onUnmounted(() => {
           </RouterLink>
         </li>
       </ul>
-      <p
-        class="pb-10 text-center font-mono text-[0.65rem] uppercase tracking-[0.3em] text-silver-500"
-      >
-        Creating &#9671; Designing
-      </p>
     </div>
   </Transition>
 </template>

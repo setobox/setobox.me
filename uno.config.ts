@@ -149,43 +149,6 @@ export default defineConfig({
       hex: "cubic-bezier(0.215, 0.61, 0.355, 1)",
       snap: "cubic-bezier(0.16, 1, 0.3, 1)",
     },
-
-    animation: {
-      keyframes: {
-        "hex-pulse":
-          "{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:.7;transform:scale(1.06)}}",
-        "hex-spin": "{from{transform:rotate(0)}to{transform:rotate(360deg)}}",
-        drift: "{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}",
-        "scan-y": "{from{transform:translateY(-100%)}to{transform:translateY(100%)}}",
-        flicker:
-          "{0%,100%{opacity:1}41%{opacity:1}42%{opacity:.35}43%{opacity:1}92%{opacity:1}93%{opacity:.5}94%{opacity:1}}",
-        "marquee-x": "{from{transform:translateX(0)}to{transform:translateX(-50%)}}",
-      },
-      durations: {
-        "hex-pulse": "4s",
-        "hex-spin": "18s",
-        drift: "6s",
-        "scan-y": "5s",
-        flicker: "7s",
-        "marquee-x": "24s",
-      },
-      timingFns: {
-        "hex-pulse": "ease-in-out",
-        "hex-spin": "linear",
-        drift: "ease-in-out",
-        "scan-y": "linear",
-        flicker: "steps(1, end)",
-        "marquee-x": "linear",
-      },
-      counts: {
-        "hex-pulse": "infinite",
-        "hex-spin": "infinite",
-        drift: "infinite",
-        "scan-y": "infinite",
-        flicker: "infinite",
-        "marquee-x": "infinite",
-      },
-    },
   },
 
   rules: [
@@ -238,19 +201,16 @@ export default defineConfig({
     // — Layout ————————————————————————————————————————————————
     ["container-page", "w-full max-w-1400px mx-auto px-5 sm:px-8 lg:px-12"],
     ["section-y", "py-24 md:py-48 lg:py-56"],
-    ["section-gap", "my-20 lg:my-32"],
 
     // — Type ——————————————————————————————————————————————————
-    [
-      "h-section",
-      "font-display font-light uppercase tracking-[0.12em] text-silver-50 text-[clamp(2.6rem,10vw,7rem)] leading-none",
-    ],
     ["label-mono", "font-mono text-[0.7rem] uppercase tracking-[0.32em] text-violet-300"],
     ["body-text", "text-silver-300 leading-relaxed"],
 
-    // — Surfaces ——————————————————————————————————————————————
-    ["panel", "relative bg-void-800/70 backdrop-blur-md border border-silver-700/70"],
-    ["panel-hover", "transition-all duration-500 ease-hex hover:border-violet-500/70"],
+    // Reused by the contact form's four fields.
+    [
+      "input-field",
+      "w-full border border-void-800 bg-void-950/60 px-4 py-3 font-mono text-sm text-silver-100 caret-violet-500 outline-none transition-[border-color,box-shadow] duration-300 placeholder:text-silver-500 focus:border-violet-500/70 focus:shadow-[0_0_0_1px_rgb(139_92_246/35%)]",
+    ],
 
     // — Interaction ————————————————————————————————————————————
     ["cursor-target", "cursor-none select-none"],

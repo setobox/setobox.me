@@ -10,6 +10,7 @@
  */
 import { computed } from "vue";
 import Giscus from "@giscus/vue";
+import SectionHeading from "@/components/ui/SectionHeading.vue";
 import { giscus } from "@/data/profile";
 
 const theme = computed(() =>
@@ -25,7 +26,9 @@ const ready = computed(() =>
 
 <template>
   <section v-if="ready" id="comments" aria-label="留言板">
+    <SectionHeading title="MESSAGES" kicker="留言板" icon="i-lucide-message-square" />
     <Giscus
+      class="mt-12"
       :repo="repo"
       :repo-id="giscus.repoId"
       :category="giscus.category"

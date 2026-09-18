@@ -59,20 +59,62 @@ useGSAP(
         class="font-display text-[clamp(4rem,18vw,10rem)] font-light leading-none text-silver-50"
         translate="no"
       >
-        <span class="glitch" data-text="404">404</span>
+        <span class="glitch relative inline-block" data-text="404">404</span>
       </h1>
 
       <p class="font-mono text-xs uppercase tracking-[0.3em] text-violet-300">
-        <DecryptedText text="BOX NOT FOUND" />
+        <DecryptedText text="页面未找到" />
       </p>
-      <p class="body-text max-w-sm text-sm">
-        这个格子是空的……也许它还没有被造出来，或者已经被搬走了。
-      </p>
+      <p class="body-text max-w-sm text-sm">请求的页面不存在。请检查网址，或返回首页。</p>
 
       <RouterLink to="/" class="cursor-target btn-hex">
         <span class="i-lucide-hexagon text-sm" aria-hidden="true" />
-        Back to home
+        返回首页
       </RouterLink>
     </div>
   </section>
 </template>
+
+<style scoped>
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.glitch::before {
+  color: var(--sb-cyan);
+  transform: translate(-2px, -1px);
+  clip-path: inset(0 0 55% 0);
+}
+
+.glitch::after {
+  color: var(--sb-magenta);
+  transform: translate(2px, 1px);
+  clip-path: inset(55% 0 0 0);
+}
+
+.glitch:hover::before,
+.glitch:hover::after {
+  opacity: 0.85;
+  animation: glitch-shift 0.36s steps(2, end) infinite;
+}
+
+@keyframes glitch-shift {
+  0% {
+    transform: translate(-2px, -1px);
+  }
+
+  50% {
+    transform: translate(2px, 1px);
+  }
+
+  100% {
+    transform: translate(-1px, 2px);
+  }
+}
+</style>

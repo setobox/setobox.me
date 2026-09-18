@@ -2,8 +2,6 @@
 /**
  * SectionHeading - the `- ABOUT -` style rule used between sections.
  *
- * The dashes are hexagons here: a rule-hexagon-title-hexagon-rule lockup.
- *
  * Laid out as an explicit `1fr auto 1fr` grid rather than flex: with flex, a
  * `whitespace-nowrap` title wide enough to overflow collapses both `flex-1`
  * rules to zero and pushes the whole row past the container, which made the
@@ -22,7 +20,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   kicker: "",
-  icon: "i-lucide-hexagon",
+  icon: "",
 });
 </script>
 
@@ -41,11 +39,9 @@ const props = withDefaults(defineProps<Props>(), {
         />
 
         <div class="flex min-w-0 items-center gap-3 sm:gap-4">
-          <!-- <span
-            class="i-lucide-hexagon hidden shrink-0 text-sm text-magenta-400 sm:block"
-            aria-hidden="true"
-          /> -->
-          <h2 class="h-section flex items-center gap-3">
+          <h2
+            class="font-display font-light uppercase tracking-[0.12em] text-silver-50 text-[clamp(2.6rem,10vw,7rem)] leading-none flex items-center gap-3"
+          >
             <DecryptedText
               :text="props.title"
               :max-iterations="10"
@@ -53,15 +49,12 @@ const props = withDefaults(defineProps<Props>(), {
               class="text-glow"
             />
             <span
+              v-if="props.icon"
               :class="props.icon"
               class="shrink-0 text-[0.7em] text-violet-400"
               aria-hidden="true"
             />
           </h2>
-          <!-- <span
-            class="i-lucide-hexagon hidden shrink-0 text-sm text-cyan-400 sm:block"
-            aria-hidden="true"
-          /> -->
         </div>
 
         <span

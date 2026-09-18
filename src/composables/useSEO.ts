@@ -22,7 +22,7 @@ const identityGraph = {
       "@type": "WebSite",
       "@id": `${site.url}#website`,
       name: site.name,
-      alternateName: ["Setobox", "姬顶盒の箱庭世界"],
+      alternateName: ["Setobox", "姬顶盒"],
       url: site.url,
       inLanguage: "zh-CN",
       publisher: { "@id": `${site.url}#person` },

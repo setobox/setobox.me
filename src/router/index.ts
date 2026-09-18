@@ -17,8 +17,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import("@/pages/HomePage.vue"),
     meta: {
       title: site.name,
-      description:
-        "Setobox / 姬顶盒的个人主页与箱庭世界，分享前端开发、项目作品、技术兴趣与日常探索。",
+      description: "Setobox / 姬顶盒的个人主页，包含个人介绍、前端项目、技术栈和联系方式。",
       canonicalPath: "/",
       keywords:
         "setobox, 姬顶盒, frontend developer, vue, typescript, gsap, web developer, 前端开发",

@@ -41,7 +41,7 @@ useGSAP(
 <template>
   <section ref="root" id="stack" class="section-y">
     <div class="container-page">
-      <SectionHeading title="TECH STACK" kicker="what the box is made of" icon="i-lucide-cpu" />
+      <SectionHeading title="TECH STACK" kicker="技术栈" icon="i-lucide-cpu" />
 
       <!-- Roles honeycomb -->
       <div class="role-comb mt-16 flex flex-wrap justify-center gap-x-2 gap-y-0 lg:mt-24">

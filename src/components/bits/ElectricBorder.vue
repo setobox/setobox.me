@@ -490,38 +490,38 @@ const glowWidth = computed(() => props.thickness * 2);
           :stroke="hexToRgba(color, 0.6)"
           :stroke-width="glowWidth"
           vector-effect="non-scaling-stroke"
-          style="filter: blur(1px)"
+          class="blur-[1px]"
         />
         <polygon
           points="50,0 98.66,28.87 98.66,86.6 50,115.47 1.34,86.6 1.34,28.87"
           :stroke="color"
           :stroke-width="glowWidth"
           vector-effect="non-scaling-stroke"
-          style="filter: blur(4px)"
+          class="blur-[4px]"
         />
       </svg>
 
       <template v-else>
         <div
-          class="absolute inset-0 rounded-[inherit] pointer-events-none"
+          class="absolute inset-0 rounded-[inherit] pointer-events-none blur-[1px]"
           :style="{
             border: `${glowWidth}px solid ${hexToRgba(color, 0.6)}`,
-            filter: 'blur(1px)',
           }"
         />
         <div
-          class="absolute inset-0 rounded-[inherit] pointer-events-none"
+          class="absolute inset-0 rounded-[inherit] pointer-events-none blur-[4px]"
           :style="{
             border: `${glowWidth}px solid ${color}`,
-            filter: 'blur(4px)',
           }"
         />
       </template>
 
       <div
-        :class="['-z-[1] absolute inset-0 opacity-30 scale-110 pointer-events-none', shapeClass]"
+        :class="[
+          '-z-[1] absolute inset-0 opacity-30 scale-110 pointer-events-none blur-[32px]',
+          shapeClass,
+        ]"
         :style="{
-          filter: 'blur(32px)',
           background: `linear-gradient(-30deg, ${color}, transparent, ${color})`,
         }"
       />

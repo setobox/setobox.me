@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * HexAvatar - the portrait, clipped to a hexagon and ringed by two
- * counter-rotating hex outlines plus an orbiting node.
+ * hexagon outlines.
  *
  * The rings are separate elements rather than a single decorated one because
  * they rotate at different rates in opposite directions - the visual reason
@@ -44,14 +44,6 @@ useGSAP(
       ease: "sine.inOut",
       repeat: -1,
       yoyo: true,
-    });
-    // The orbit node rides its own wrapper so its counter-rotation keeps the
-    // node itself upright.
-    gsap.to(".hex-orbit", {
-      rotate: 360,
-      duration: 11,
-      ease: "none",
-      repeat: -1,
     });
   },
   { scope: root },
@@ -100,13 +92,6 @@ useGSAP(
         opacity="0.45"
       />
     </svg>
-
-    <!-- Orbiting node. -->
-    <div class="hex-orbit pointer-events-none absolute inset-0 origin-center">
-      <div
-        class="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 hex-point bg-cyan-400 shadow-[0_0_12px_#4CD9F5]"
-      />
-    </div>
 
     <!-- The portrait. -->
     <div class="absolute inset-0 hex-point overflow-hidden bg-void-800">

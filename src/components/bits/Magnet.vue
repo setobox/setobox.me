@@ -76,18 +76,13 @@ watch(
 </script>
 
 <template>
-  <div
-    ref="magnetRef"
-    :class="wrapperClassName"
-    :style="{ position: 'relative', display: 'inline-block' }"
-    v-bind="$attrs"
-  >
+  <div ref="magnetRef" :class="wrapperClassName" class="relative inline-block" v-bind="$attrs">
     <div
       :class="innerClassName"
+      class="will-change-transform"
       :style="{
         transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
         transition: transitionStyle,
-        willChange: 'transform',
       }"
     >
       <slot />

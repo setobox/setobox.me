@@ -273,10 +273,9 @@ onUnmounted(() => {
   >
     <div
       ref="textRef"
-      class="inline-block"
+      class="inline-block leading-[1.4]"
       :style="{
         fontSize: props.fontSize,
-        lineHeight: 1.4,
       }"
     >
       <template v-for="(word, index) in words" :key="`${index}-${word.text}`">

@@ -1,7 +1,3 @@
-<!--
-  ProfileCard — sourced from vue-bits (DavidHDev/vue-bits), the Vue port of React Bits.
-  License: MIT + Commons Clause v1.0 — https://github.com/DavidHDev/vue-bits/blob/main/LICENSE.md
--->
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
@@ -37,19 +33,19 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  avatarUrl: "<Placeholder for avatar URL>",
-  iconUrl: "<Placeholder for icon URL>",
-  grainUrl: "<Placeholder for grain URL>",
+  avatarUrl: "",
+  iconUrl: "",
+  grainUrl: "",
   behindGlowEnabled: true,
   className: "",
   enableTilt: true,
   enableMobileTilt: false,
   mobileTiltSensitivity: 5,
-  name: "Javi A. Torres",
-  title: "Software Engineer",
-  handle: "javicodes",
-  status: "Online",
-  contactText: "Contact",
+  name: "",
+  title: "",
+  handle: "",
+  status: "",
+  contactText: "",
   showUserInfo: true,
 });
 
@@ -330,55 +326,106 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="wrapRef" :class="`pc-card-wrapper ${className}`.trim()" :style="cardStyle">
-    <div v-if="behindGlowEnabled" class="pc-behind" />
+  <div
+    ref="wrapRef"
+    class="pc-card-wrapper relative persp-500 touch-none"
+    :class="className"
+    :style="cardStyle"
+  >
+    <div
+      v-if="behindGlowEnabled"
+      class="pc-behind pointer-events-none absolute inset-0 z-0 transition-opacity duration-200"
+      aria-hidden="true"
+    />
 
-    <div ref="shellRef" class="pc-card-shell">
-      <section class="pc-card">
-        <div class="pc-inside">
-          <div class="pc-shine" />
-          <div class="pc-glare" />
+    <div ref="shellRef" class="pc-card-shell relative z-1">
+      <section
+        class="pc-card relative grid h-[60svh] max-h-[380px] max-w-[calc(100vw-40px)] aspect-[0.718] overflow-hidden rounded-[var(--card-radius)] bg-black/90 backface-hidden xs:h-[70svh] xs:max-h-[450px] md:h-[80svh] md:max-h-[540px]"
+      >
+        <div
+          class="pointer-events-none bg-[image:var(--inner-gradient)] absolute inset-0 grid [grid-area:1/-1] rounded-[var(--card-radius)] bg-black/90"
+        >
+          <div
+            class="pc-shine pointer-events-none grid [grid-area:1/-1] rounded-[var(--card-radius)]"
+            aria-hidden="true"
+          />
+          <div
+            class="pc-glare pointer-events-none z-4 grid overflow-hidden [grid-area:1/-1] rounded-[var(--card-radius)] mix-blend-overlay"
+            aria-hidden="true"
+          />
 
-          <div class="pc-content pc-avatar-content">
+          <div
+            class="pc-avatar-content pointer-events-none grid overflow-visible [grid-area:1/-1] rounded-[var(--card-radius)] mix-blend-luminosity backface-hidden"
+          >
             <img
-              class="avatar"
+              v-if="avatarUrl"
+              class="avatar absolute bottom-[-1px] left-1/2 w-full origin-bottom rounded-[var(--card-radius)] backface-hidden will-change-transform"
               :src="avatarUrl"
-              :alt="`${name || 'User'} avatar`"
+              :alt="name ? `${name}的头像` : '用户头像'"
               loading="lazy"
               @error="handleAvatarError"
             />
 
-            <div v-if="showUserInfo" class="pc-user-info">
-              <div class="pc-user-details">
-                <div class="pc-mini-avatar">
+            <div
+              v-if="showUserInfo && (handle || status || contactText)"
+              class="pointer-events-auto [--ui-inset:12px] xs:[--ui-inset:15px] md:[--ui-inset:20px] rounded-[max(0px,calc(var(--card-radius)-var(--ui-inset)+6px))] absolute inset-x-[var(--ui-inset)] bottom-[var(--ui-inset)] z-2 flex items-center justify-between border border-white/10 bg-white/10 px-2.5 py-2 backdrop-blur-[30px] xs:px-3 xs:py-2.5 md:px-3.5 md:py-3"
+            >
+              <div v-if="handle || status" class="flex items-center gap-2 xs:gap-2.5 md:gap-3">
+                <div
+                  v-if="miniAvatarUrl || avatarUrl"
+                  class="h-6 w-6 shrink-0 overflow-hidden rounded-full border border-white/10 xs:h-7 xs:w-7 md:h-12 md:w-12"
+                >
                   <img
                     :src="miniAvatarUrl || avatarUrl"
-                    :alt="`${name || 'User'} mini avatar`"
+                    :alt="name ? `${name}的头像` : '用户头像'"
+                    class="h-full w-full rounded-full object-cover"
                     loading="lazy"
                     @error="handleMiniAvatarError"
                   />
                 </div>
-                <div class="pc-user-text">
-                  <div class="pc-handle">@{{ handle }}</div>
-                  <div class="pc-status">{{ status }}</div>
+                <div class="flex flex-col items-start gap-1.5">
+                  <div
+                    v-if="handle"
+                    class="text-xs font-medium leading-none text-white/90 xs:text-[13px] md:text-sm"
+                  >
+                    @{{ handle }}
+                  </div>
+                  <div v-if="status" class="text-xs leading-none text-white/70 md:text-sm">
+                    {{ status }}
+                  </div>
                 </div>
               </div>
               <button
-                class="pc-contact-btn"
+                v-if="contactText"
+                class="pointer-events-auto min-h-11 cursor-pointer rounded-lg border border-white/10 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-[10px] transition-all duration-200 hover:-translate-y-px hover:border-white/40 md:px-4 md:py-3"
                 @click="handleContactClick"
-                style="pointer-events: auto"
                 type="button"
-                :aria-label="`Contact ${name || 'user'}`"
+                :aria-label="name ? `联系${name}` : contactText"
               >
                 {{ contactText }}
               </button>
             </div>
           </div>
 
-          <div class="pc-content">
-            <div class="pc-details">
-              <h3>{{ name }}</h3>
-              <p>{{ title }}</p>
+          <div
+            class="pc-content pointer-events-none relative z-5 grid max-h-full overflow-hidden [grid-area:1/-1] rounded-[var(--card-radius)] text-center mix-blend-luminosity"
+          >
+            <div
+              v-if="name || title"
+              class="absolute top-[1.5em] flex w-full flex-col xs:top-[2em] md:top-[3em]"
+            >
+              <h3
+                v-if="name"
+                class="m-0 bg-[linear-gradient(to_bottom,#fff,#6f6fbe)] bg-[length:1em_1.5em] bg-clip-text text-[min(3.5svh,2em)] font-semibold text-transparent xs:text-[min(4svh,2.5em)] md:text-[min(5svh,3em)]"
+              >
+                {{ name }}
+              </h3>
+              <p
+                v-if="title"
+                class="relative top-[-8px] mx-auto my-0 w-min whitespace-nowrap bg-[linear-gradient(to_bottom,#fff,#4a4ac0)] bg-[length:1em_1.5em] bg-clip-text text-xs font-semibold text-transparent xs:top-[-12px] xs:text-sm md:text-base"
+              >
+                {{ title }}
+              </p>
             </div>
           </div>
         </div>
@@ -419,17 +466,10 @@ onUnmounted(() => {
   --sunpillar-clr-6: var(--sunpillar-6);
   --card-radius: 30px;
 
-  perspective: 500px;
   transform: translate3d(0, 0, 0.1px);
-  position: relative;
-  touch-action: none;
 }
 
 .pc-behind {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
   background: radial-gradient(
     circle at var(--pointer-x) var(--pointer-y),
     var(--behind-glow-color) 0%,
@@ -437,7 +477,6 @@ onUnmounted(() => {
   );
   filter: blur(50px) saturate(1.1);
   opacity: calc(0.8 * var(--card-opacity));
-  transition: opacity 200ms ease;
 }
 
 .pc-card-wrapper:hover,
@@ -445,27 +484,12 @@ onUnmounted(() => {
   --card-opacity: 1;
 }
 
-.pc-card-shell {
-  position: relative;
-  z-index: 1;
-}
-
 .pc-card {
-  height: 80svh;
-  max-height: 540px;
-  display: grid;
-  aspect-ratio: 0.718;
-  border-radius: var(--card-radius);
-  position: relative;
   background-blend-mode: color-dodge, normal, normal, normal;
-  animation: glow-bg 12s linear infinite;
   box-shadow: rgba(0, 0, 0, 0.8) calc((var(--pointer-from-left) * 10px) - 3px)
     calc((var(--pointer-from-top) * 20px) - 6px) 20px -5px;
   transition: transform 1s ease;
   transform: translateZ(0) rotateX(0deg) rotateY(0deg);
-  background: rgba(0, 0, 0, 0.9);
-  backface-visibility: hidden;
-  overflow: hidden;
 }
 
 .pc-card:hover,
@@ -476,21 +500,6 @@ onUnmounted(() => {
 
 .pc-card-shell.entering .pc-card {
   transition: transform 180ms ease-out;
-}
-
-.pc-card * {
-  display: grid;
-  grid-area: 1/-1;
-  border-radius: var(--card-radius);
-  pointer-events: none;
-}
-
-.pc-inside {
-  inset: 0;
-  position: absolute;
-  background-image: var(--inner-gradient);
-  background-color: rgba(0, 0, 0, 0.9);
-  transform: none;
 }
 
 .pc-shine {
@@ -623,181 +632,31 @@ onUnmounted(() => {
 
 .pc-glare {
   transform: translate3d(0, 0, 1.1px);
-  overflow: hidden;
   background-image: radial-gradient(
     farthest-corner circle at var(--pointer-x) var(--pointer-y),
     hsl(248, 25%, 80%) 12%,
     hsla(207, 40%, 30%, 0.8) 90%
   );
-  mix-blend-mode: overlay;
   filter: brightness(0.8) contrast(1.2);
-  z-index: 4;
 }
 
 .pc-avatar-content {
-  mix-blend-mode: luminosity;
-  overflow: visible;
-  transform: translateZ(2);
-  backface-visibility: hidden;
+  transform: translateZ(2px);
 }
 
 .pc-avatar-content .avatar {
-  width: 100%;
-  position: absolute;
-  left: 50%;
-  transform-origin: 50% 100%;
   transform: translateX(calc(-50% + (var(--pointer-from-left) - 0.5) * 6px)) translateZ(0)
     scaleY(calc(1 + (var(--pointer-from-top) - 0.5) * 0.02))
     scaleX(calc(1 + (var(--pointer-from-left) - 0.5) * 0.01));
-  bottom: -1px;
-  backface-visibility: hidden;
-  will-change: transform;
   transition: transform 120ms ease-out;
 }
 
-.pc-avatar-content::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  backdrop-filter: none;
-  pointer-events: none;
-}
-
-.pc-user-info {
-  position: absolute;
-  --ui-inset: 20px;
-  --ui-radius-bias: 6px;
-  bottom: var(--ui-inset);
-  left: var(--ui-inset);
-  right: var(--ui-inset);
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: calc(max(0px, var(--card-radius) - var(--ui-inset) + var(--ui-radius-bias)));
-  padding: 12px 14px;
-  pointer-events: auto;
-}
-
-.pc-user-details {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.pc-mini-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0;
-}
-
-.pc-mini-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.pc-user-text {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.pc-handle {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1;
-}
-
-.pc-status {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1;
-}
-
-.pc-contact-btn {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
-  background: transparent;
-}
-
-.pc-contact-btn:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-1px);
-}
-
-.pc-content:not(.pc-avatar-content) {
-  max-height: 100%;
-  overflow: hidden;
-  text-align: center;
-  position: relative;
+.pc-content {
   transform: translate3d(
     calc(var(--pointer-from-left) * -6px + 3px),
     calc(var(--pointer-from-top) * -6px + 3px),
     0.1px
   );
-  z-index: 5;
-  mix-blend-mode: luminosity;
-}
-
-.pc-details {
-  width: 100%;
-  position: absolute;
-  top: 3em;
-  display: flex;
-  flex-direction: column;
-}
-
-.pc-details h3 {
-  font-weight: 600;
-  margin: 0;
-  font-size: min(5svh, 3em);
-  background-image: linear-gradient(to bottom, #fff, #6f6fbe);
-  background-size: 1em 1.5em;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  -webkit-background-clip: text;
-}
-
-.pc-details p {
-  font-weight: 600;
-  position: relative;
-  top: -12px;
-  white-space: nowrap;
-  font-size: 16px;
-  margin: 0 auto;
-  width: min-content;
-  background-image: linear-gradient(to bottom, #fff, #4a4ac0);
-  background-size: 1em 1.5em;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  -webkit-background-clip: text;
-}
-
-@keyframes glow-bg {
-  0% {
-    --bgrotate: 0deg;
-  }
-  100% {
-    --bgrotate: 360deg;
-  }
 }
 
 @keyframes holo-bg {
@@ -812,116 +671,6 @@ onUnmounted(() => {
       0 var(--background-y),
       90% 90%,
       center;
-  }
-}
-
-@media (max-width: 768px) {
-  .pc-card {
-    height: 70svh;
-    max-height: 450px;
-  }
-  .pc-details {
-    top: 2em;
-  }
-  .pc-details h3 {
-    font-size: min(4svh, 2.5em);
-  }
-  .pc-details p {
-    font-size: 14px;
-  }
-  .pc-user-info {
-    --ui-inset: 15px;
-    padding: 10px 12px;
-  }
-  .pc-mini-avatar {
-    width: 28px;
-    height: 28px;
-  }
-  .pc-user-details {
-    gap: 10px;
-  }
-  .pc-handle {
-    font-size: 13px;
-  }
-  .pc-status {
-    font-size: 10px;
-  }
-  .pc-contact-btn {
-    padding: 6px 12px;
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 480px) {
-  .pc-card {
-    height: 60svh;
-    max-height: 380px;
-  }
-  .pc-details {
-    top: 1.5em;
-  }
-  .pc-details h3 {
-    font-size: min(3.5svh, 2em);
-  }
-  .pc-details p {
-    font-size: 12px;
-    top: -8px;
-  }
-  .pc-user-info {
-    --ui-inset: 12px;
-    padding: 8px 10px;
-  }
-  .pc-mini-avatar {
-    width: 24px;
-    height: 24px;
-  }
-  .pc-user-details {
-    gap: 8px;
-  }
-  .pc-handle {
-    font-size: 12px;
-  }
-  .pc-status {
-    font-size: 9px;
-  }
-  .pc-contact-btn {
-    padding: 5px 10px;
-    font-size: 10px;
-    border-radius: 50px;
-  }
-}
-
-@media (max-width: 320px) {
-  .pc-card {
-    height: 55svh;
-    max-height: 320px;
-  }
-  .pc-details h3 {
-    font-size: min(3svh, 1.5em);
-  }
-  .pc-details p {
-    font-size: 11px;
-  }
-  .pc-user-info {
-    padding: 6px 8px;
-  }
-  .pc-mini-avatar {
-    width: 20px;
-    height: 20px;
-  }
-  .pc-user-details {
-    gap: 6px;
-  }
-  .pc-handle {
-    font-size: 11px;
-  }
-  .pc-status {
-    font-size: 8px;
-  }
-  .pc-contact-btn {
-    padding: 4px 8px;
-    font-size: 9px;
-    border-radius: 50px;
   }
 }
 </style>

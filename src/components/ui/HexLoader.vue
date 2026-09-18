@@ -129,7 +129,7 @@ onMounted(async () => {
     ref="root"
     class="fixed inset-0 z-9500 overflow-hidden"
     role="status"
-    aria-label="Loading"
+    aria-label="正在加载页面"
   >
     <div class="loader-ground absolute inset-0 bg-void-950" />
 
@@ -146,7 +146,7 @@ onMounted(async () => {
       <use
         v-for="(cell, i) in cells"
         :key="i"
-        class="loader-hex"
+        class="loader-hex stroke-violet-500 [stroke-width:0.6] [stroke-opacity:0.9] [will-change:transform,opacity,stroke,stroke-dashoffset]"
         href="#loader-hex-cell"
         :x="cell.x"
         :y="cell.y"
@@ -154,12 +154,3 @@ onMounted(async () => {
     </svg>
   </div>
 </template>
-
-<style scoped>
-.loader-hex {
-  stroke: #8b5cf6;
-  stroke-width: 0.6;
-  stroke-opacity: 0.9;
-  will-change: transform, opacity, stroke, stroke-dashoffset;
-}
-</style>

@@ -115,7 +115,3 @@ onBeforeUnmount(() => {
     <slot />
   </div>
 </template>
-
-<style scoped>
-/* GSAP will handle all transforms and opacity */
-</style>

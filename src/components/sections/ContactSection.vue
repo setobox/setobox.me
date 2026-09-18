@@ -33,7 +33,7 @@ useGSAP(
 <template>
   <section ref="root" id="contact" class="section-y">
     <div class="container-page">
-      <SectionHeading title="CONTACT" kicker="open a channel" icon="i-lucide-message-circle" />
+      <SectionHeading title="CONTACT" kicker="联系方式" icon="i-lucide-message-circle" />
 
       <div class="mx-auto mt-16 max-w-4xl lg:mt-24">
         <!-- Primary: email -->
@@ -55,13 +55,12 @@ useGSAP(
                     class="i-lucide-mail text-4xl text-violet-300 transition-transform duration-500 ease-hex group-hover:scale-110"
                     aria-hidden="true"
                   />
-                  <p class="label-mono">drop a line</p>
+                  <p class="label-mono">发送邮件</p>
                   <p
                     class="cursor-target break-all font-display text-xl tracking-[0.04em] text-silver-50 transition-all duration-300 group-hover:glow-16 sm:text-3xl"
                   >
                     {{ profile.email }}
                   </p>
-                  <p class="body-text max-w-md text-sm">……</p>
                 </div>
               </a>
             </ElectricBorder>

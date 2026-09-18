@@ -86,19 +86,28 @@ const hue = computed(() => {
             class="flex flex-1 flex-col gap-4 border-t-2 border-silver-700/70 p-6 md:border-t-0 md:p-8"
             :class="flip ? 'md:border-r-2' : 'md:border-l-2'"
           >
-            <a :href="project.href" target="_blank" rel="noopener noreferrer" class="block">
-              <div class="flex gap-4 w-fit cursor-target">
-                <span
-                  class="font-display text-3xl font-light uppercase tracking-[0.06em] text-silver-50 transition-all duration-300 group-hover:glow-14 hovertrans md:text-4xl"
-                >
-                  {{ project.title }}
+            <h3>
+              <component
+                :is="project.href ? 'a' : 'span'"
+                :href="project.href || undefined"
+                :target="project.href ? '_blank' : undefined"
+                :rel="project.href ? 'noopener noreferrer' : undefined"
+                class="block"
+              >
+                <span class="flex gap-4 w-fit" :class="{ 'cursor-target': project.href }">
+                  <span
+                    class="font-display text-3xl font-light uppercase tracking-[0.06em] text-silver-50 transition-all duration-300 group-hover:glow-14 hovertrans md:text-4xl"
+                  >
+                    {{ project.title }}
+                  </span>
+                  <span
+                    v-if="project.href"
+                    class="i-lucide-arrow-up-right shrink-0 text-xl text-silver-500 transition-all duration-400 ease-hex group-hover:translate-x-1 group-hover:text-violet-300"
+                    aria-hidden="true"
+                  />
                 </span>
-                <span
-                  class="i-lucide-arrow-up-right shrink-0 text-xl text-silver-500 transition-all duration-400 ease-hex group-hover:translate-x-1 group-hover:text-violet-300"
-                  aria-hidden="true"
-                />
-              </div>
-            </a>
+              </component>
+            </h3>
 
             <div class="flex flex-wrap gap-2">
               <span

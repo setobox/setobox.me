@@ -15,6 +15,7 @@ import SectionHeading from "@/components/ui/SectionHeading.vue";
 import { scrollReveal, useGSAP } from "@/composables/useGSAP";
 import { useSmoothScroll } from "@/composables/useSmoothScroll";
 import { infoRows, profile } from "@/data/profile";
+import BoxIcon from "@/assets/svg/box.svg";
 
 interface Props {
   intro?: boolean;
@@ -58,7 +59,7 @@ useGSAP(
 <template>
   <section ref="root" id="about" class="section-y">
     <div class="container-page">
-      <SectionHeading title="ABOUT" kicker="who is behind the box" icon="i-lucide-box" />
+      <SectionHeading title="ABOUT" kicker="个人资料" icon="i-lucide-box" />
 
       <div
         class="mt-16 flex flex-col items-center gap-12 lg:mt-24 lg:flex-row lg:items-start lg:gap-20"
@@ -66,14 +67,13 @@ useGSAP(
         <FadeContent :blur="true" :duration="1000" :delay="120">
           <ProfileCard
             :avatar-url="profile.avatar"
+            :icon-url="BoxIcon"
             name="Setobox"
             title="Frontend Developer"
             :handle="profile.handle"
-            status="Online"
-            contact-text="Contact"
-            behind-glow-color="rgba(139, 92, 246, 0.6)"
-            inner-gradient="linear-gradient(145deg, rgba(139,92,246,0.35) 0%, rgba(76,217,245,0.2) 100%)"
+            contact-text="联系"
             @contact-click="goContact"
+            :show-user-info="false"
           />
         </FadeContent>
 

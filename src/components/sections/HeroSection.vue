@@ -37,28 +37,6 @@ useGSAP(
         delay: 2.5,
       },
     );
-
-    // // Slow drift on the ring once it has settled, so the hero is never static.
-    // gsap.to(".hero-ring", {
-    //   rotate: 360,
-    //   duration: 90,
-    //   ease: "none",
-    //   repeat: -1,
-    //   delay: 2,
-    // });
-
-    // // Parallax the headline out as the next section arrives.
-    // gsap.to(".hero-inner", {
-    //   yPercent: -14,
-    //   opacity: 0.25,
-    //   ease: "none",
-    //   scrollTrigger: {
-    //     trigger: root.value,
-    //     start: "top top",
-    //     end: "bottom top",
-    //     scrub: true,
-    //   },
-    // });
   },
   { scope: root },
 );
@@ -73,56 +51,16 @@ function next() {
     ref="root"
     class="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-5"
   >
-    <!-- Concentric hexagon rings behind the type. -->
-    <!-- <div
-      class="hero-ring pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[min(86vw,min(74vh,660px))] -translate-x-1/2 -translate-y-1/2"
-      aria-hidden="true"
-    >
-      <svg viewBox="0 0 200 200" fill="none" class="h-full w-full">
-        <g stroke-linejoin="round">
-          <polygon
-            points="100,8 180,54 180,146 100,192 20,146 20,54"
-            stroke="#8B5CF6"
-            stroke-width="0.5"
-            opacity="0.35"
-          />
-          <polygon
-            points="100,28 163,64 163,136 100,172 37,136 37,64"
-            stroke="#4CD9F5"
-            stroke-width="0.4"
-            stroke-dasharray="3 6"
-            opacity="0.4"
-          />
-          <polygon
-            points="100,52 142,76 142,124 100,148 58,124 58,76"
-            stroke="#FF2E9E"
-            stroke-width="0.35"
-            opacity="0.25"
-          />
-        </g>
-      </svg>
-    </div> -->
-
-    <!-- Soft glow sphere behind the headline. -->
+    <!-- Background glow. -->
     <div
-      class="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[min(70vw,560px)] -translate-x-1/2 -translate-y-1/2 rounded-full"
-      style="
-        background: radial-gradient(
-          circle at 50% 50%,
-          rgba(139, 92, 246, 0.4) 0%,
-          rgba(76, 217, 245, 0.12) 45%,
-          transparent 72%
-        );
-        filter: blur(48px);
-        mix-blend-mode: screen;
-      "
+      class="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[min(70vw,560px)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.4)_0%,rgba(76,217,245,0.12)_45%,transparent_72%)] blur-[48px] mix-blend-screen"
       aria-hidden="true"
     />
 
     <div class="hero-inner relative z-2 flex w-full max-w-6xl flex-col items-center">
       <h1 class="sr-only">{{ site.identity }}</h1>
       <div
-        class="w-full text-center font-display2 font-light uppercase leading-[1.04] tracking-[0.01em] text-silver-50 text-[clamp(2rem,5.5vw,7.5rem)]"
+        class="w-full text-center font-display2 font-light uppercase leading-[1.04] tracking-[0.01em] text-silver-50 text-[clamp(1.5rem,5.5vw,7.5rem)]"
         translate="no"
       >
         <AnimatedContent
@@ -169,33 +107,34 @@ function next() {
           </p>
         </AnimatedContent>
       </div>
-
-      <div class="hero-meta mt-9 flex flex-col items-center gap-5">
-        <!-- Fixed width, left-aligned: sizing to the current text would make
-             the panel breathe in and out on every keystroke. Width is set from
-             the longest string in the set. -->
-        <!-- <div
-          class="cut-10 w-[min(88vw,20rem)] border border-silver-700/80 bg-void-800/60 px-4 py-2.5 text-left backdrop-blur-sm"
-        >
-          <TextType :text="[...profile.typed]" class="font-mono text-xs text-cyan-200 sm:text-sm" />
-        </div> -->
-
-        <!-- <p
-          class="max-w-md text-center font-mono text-[0.62rem] uppercase tracking-[0.34em] text-silver-400"
-        >
-          {{ site.tagline }}
-        </p> -->
-      </div>
     </div>
 
     <!-- Scroll cue. -->
     <a
       href="#about"
       class="hero-cue cursor-target absolute bottom-9 left-1/2 z-2 flex -translate-x-1/2 flex-col items-center gap-2 text-silver-500 transition-colors duration-300 hover:text-violet-300"
-      aria-label="Scroll to next section"
+      aria-label="查看个人资料"
       @click.prevent="next"
     >
-      <span class="i-lucide-chevron-down animate-hex-pulse text-6xl" aria-hidden="true" />
+      <span class="i-lucide-chevron-down scroll-cue text-6xl" aria-hidden="true" />
     </a>
   </section>
 </template>
+
+<style scoped>
+.scroll-cue {
+  animation: scroll-cue-pulse 4s ease-in-out infinite;
+}
+
+@keyframes scroll-cue-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.06);
+  }
+}
+</style>
