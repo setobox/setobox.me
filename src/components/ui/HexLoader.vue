@@ -3,8 +3,9 @@
  * HexLoader - the boot screen.
  *
  * A honeycomb plate covers the viewport: each hexagon draws its own outline on
- * from a random dash phase, the lattice breathes through a violet colour cycle,
- * then the cells collapse in random order to reveal the page underneath.
+ * from a random dash phase, the lattice brightens, then individual tiles fade
+ * away in a shuffled order, opening hexagonal windows onto the page beneath.
+ * A few tiles lose only their fill first, keeping an outline until their turn.
  *
  * Tiling happens in viewBox units with `preserveAspectRatio="xMinYMin slice"`,
  * so 1000 units always map to `max(vw, vh)` px. The visible region is therefore
@@ -15,8 +16,8 @@
  * wait for web fonts or the window load event. Both can be delayed by the
  * network and would make a cosmetic loading screen hold back first content.
  */
-import { onMounted, ref, useTemplateRef } from "vue";
-import { gsap, prefersReducedMotion } from "@/composables/useGSAP";
+import { ref, useTemplateRef } from "vue";
+import { gsap, useGSAP } from "@/composables/useGSAP";
 
 const emit = defineEmits<{ reveal: []; done: [] }>();
 
@@ -61,66 +62,96 @@ const cells = Array.from({ length: Math.ceil(VIEW / stepY) + 1 }, (_, row) =>
 
 function finish() {
   hidden.value = true;
-  emit("reveal");
   emit("done");
 }
 
-/** Floor, so the assemble animation is never cut off mid-stagger. */
-function settled(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 1300));
-}
+useGSAP(
+  ({ reduced }) => {
+    const timeline = gsap.timeline({ onComplete: finish });
 
-onMounted(async () => {
-  if (prefersReducedMotion()) {
-    gsap.set(".loader-hex", { strokeDashoffset: 0 });
-    await settled();
-    gsap.to(root.value, { autoAlpha: 0, duration: 0.35, onComplete: finish });
-    return;
-  }
+    if (reduced) {
+      gsap.set(".loader-hex", { strokeDashoffset: 0 });
+      timeline.to(
+        root.value,
+        {
+          autoAlpha: 0,
+          duration: 0.35,
+          ease: "power2.inOut",
+          onStart: () => emit("reveal"),
+        },
+        0.2,
+      );
+      return;
+    }
 
-  // `transformOrigin` at the bbox centre is each cell's own middle, so the
-  // scale in and the collapse both happen about the hexagon, not the plate.
-  gsap.set(".loader-hex", {
-    transformOrigin: "50% 50%",
-    strokeDashoffset: () => gsap.utils.random(-perimeter, perimeter),
-    autoAlpha: 0,
-    scale: 0,
-  });
-
-  gsap.to(".loader-hex", {
-    strokeDashoffset: 0,
-    autoAlpha: 1,
-    scale: 1,
-    duration: 0.45,
-    ease: "power2.out",
-    stagger: { each: 0.012, from: "start" },
-  });
-
-  // Colour cycle across the lattice in random order, held until the reveal.
-  const pulse = gsap.timeline({ repeat: -1, yoyo: true, delay: 0.5 }).to(".loader-hex", {
-    stroke: "#C1A5FF",
-    duration: 0.7,
-    ease: "power2.in",
-    stagger: { each: 0.01, from: "random" },
-  });
-
-  await settled();
-
-  gsap
-    .timeline({ onComplete: finish, delay: 0.25 })
-    .to(".loader-ground", { autoAlpha: 0, duration: 0.45 }, 0)
-    .to(".loader-hex", {
-      scale: 0,
+    gsap.set(".loader-hex", {
+      // GSAP cannot interpolate UnoCSS's computed oklab token: it would
+      // start the colour tween from transparent black and hide the drawing.
+      stroke: "#8B5CF6",
+      fillOpacity: 1,
+      transformOrigin: "50% 50%",
+      strokeDashoffset: () => gsap.utils.random(-perimeter, perimeter),
       autoAlpha: 0,
-      duration: 0.2,
-      ease: "power2.in",
-      stagger: { each: 0.006, from: "random" },
-      onStart: () => {
-        pulse.kill();
-        emit("reveal");
-      },
+      scale: 0,
     });
-});
+
+    // Bound the whole stagger so ultrawide layouts with more cells take
+    // the same time, and finish assembling before the exit starts.
+    timeline.to(".loader-hex", {
+      strokeDashoffset: 0,
+      autoAlpha: 1,
+      scale: 1,
+      duration: 0.45,
+      ease: "power2.out",
+      stagger: { amount: 0.65, from: "start" },
+    });
+    timeline.to(".loader-hex", { stroke: "#C1A5FF", duration: 0.7, ease: "sine.inOut" }, 0.4);
+
+    // The assembled tiles cover the viewport, so removing their solid backing
+    // reveals nothing yet. Each tile then uncovers its own patch of the page.
+    timeline.addLabel("reveal", "+=0.2");
+    timeline.set(".loader-ground", { autoAlpha: 0 }, "reveal");
+    timeline.to(
+      ".loader-hex",
+      {
+        autoAlpha: 0,
+        duration: 0.22,
+        ease: "power2.inOut",
+        stagger: { amount: 0.75, from: "random" },
+        onStart: () => emit("reveal"),
+      },
+      "reveal",
+    );
+
+    // Pick a small visible subset, since the square SVG extends offscreen.
+    // Animate only fill-opacity on the same label: each outline keeps its
+    // original fade slot, and this shorter effect cannot extend the exit.
+    const tiles = gsap.utils.toArray<SVGUseElement>(".loader-hex");
+    const viewportScale = Math.max(window.innerWidth, window.innerHeight) / VIEW;
+    const visibleTiles = tiles.filter((_, index) => {
+      const cell = cells[index];
+      return (
+        cell &&
+        cell.x < window.innerWidth / viewportScale &&
+        cell.y < window.innerHeight / viewportScale
+      );
+    });
+    const hollowTiles = gsap.utils
+      .shuffle(visibleTiles)
+      .slice(0, Math.max(2, Math.round(visibleTiles.length * 0.12)));
+    timeline.to(
+      hollowTiles,
+      {
+        fillOpacity: 0,
+        duration: 0.16,
+        ease: "sine.out",
+        stagger: { amount: 0.16 },
+      },
+      "reveal",
+    );
+  },
+  { scope: root },
+);
 </script>
 
 <template>
